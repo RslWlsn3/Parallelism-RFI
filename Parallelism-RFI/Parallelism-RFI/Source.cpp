@@ -4,6 +4,7 @@
 #include<string>
 #include<ctime>   
 #include<cstdlib> 
+#include<climits> 
 using namespace std;
 
 int* create_random_nums(int size)
@@ -14,7 +15,7 @@ int* create_random_nums(int size)
 
 	for (int i = 0; i < size; i++)
 	{
-		int x = rand() % 10000;  
+		int x = rand() % INT_MAX;  
 		randNums[i] = x;
 	}	
 	return randNums;
@@ -112,23 +113,36 @@ void serialMergeSortint(int currentArray[], int low, int high, int size)
 	}
 }
 
-int main()
+void merge_int_serial()
 {
 	//code to test merge sort with ints
-	int size = 50;
+	int size = 100000000;	//crashes when I add another 0
 	int* arr = create_random_nums(size);
 
 	serialMergeSortint(arr, 0, size - 1, size);
-	
-	//code to test merge sort with strings
-	/*int size= 3;	
-	string *arr;
-	arr = new string[size]{ "John", "Connor", "bill" };	
-	
 
-	serialMergeSort(arr, 0, size - 1, size);*/
-	
 	//print out results
 	for (int i = 0; i < size; i++)
 		cout << arr[i] << endl;
+}
+
+void test_merge_string_serial()
+{
+	//code to test merge sort with strings
+	int size= 3;
+	string *arr;
+	arr = new string[size]{ "John", "Connor", "bill" };
+
+	serialMergeSort(arr, 0, size - 1, size);
+	//print out results
+	for (int i = 0; i < size; i++)
+		cout << arr[i] << endl;
+}
+
+
+
+int main()
+{	
+	merge_int_serial();
+	
 }
