@@ -1,11 +1,13 @@
 //RFI
 #define _CRT_SECURE_NO_WARNINGS
+const int CSV_SIZE = 25038;
 #include<iostream>
 #include<thread>
 #include<string>
 #include<ctime>   
 #include<cstdlib> 
 #include<climits> 
+#include<fstream>
 using namespace std;
 
 //TO DO: use this instead of namesArray and dateArray
@@ -14,6 +16,7 @@ class csv_data
 public:
 	string name;
 	string donorStatus;
+	string gradDate;
 	int year;
 	int month;
 	int day;
@@ -226,9 +229,75 @@ int get_date_value(int month, int day, int year)
 
 }
 
-int main()
+csv_data* readCSV(string fileName) {
+	ifstream file;
+	string temp;
+	file.open(fileName);
+	int i = -1;
+
+	csv_data* alumni = new csv_data[CSV_SIZE];
+
+	if (file.is_open()) {
+		//read from the file
+
+		//ignore the first line
+		file.ignore(200, '\n');
+
+		while (!file.eof()) {
+			i++;
+			//create new csv_data obj
+			csv_data d;
+
+			//trash
+			getline(file, temp, '"');
+
+			//get value
+			getline(file, temp, '"');
+			d.name = temp;
+
+			//trash comma
+			getline(file, temp, ',');
+
+			//get value
+			getline(file, temp, ',');
+			d.donorStatus = temp;
+
+			//trash
+			getline(file, temp, ',');
+			if (temp.empty()) {
+				getline(file, temp, '\n');
+			}
+			else {
+				//parse date
+				temp.erase(0, 1);
+				d.gradDate = temp;
+
+				getline(file, temp, '"');
+				d.gradDate = d.gradDate + "," + temp;
+
+				//trash
+				getline(file, temp, ',');
+				//get inst
+				getline(file, temp, '\n');
+				d.institution = temp;
+			}
+
+			alumni[i] = d;
+		}
+	}
+	else {
+		std::cout << "\nThere was an error opening " << fileName;
+	}
+
+	return alumni;
+
+}
+
+int main(int argc, char*argv[])
 {	
 	//test_merge_int_serial();
 	//cout << get_date_value(10, 4, 1964);
-	test_merge_string_serial();	
+	//test_merge_string_serial();	
+	csv_data* data;
+	data = readCSV(argv[1]);
 }
