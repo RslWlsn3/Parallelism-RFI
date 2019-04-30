@@ -6,6 +6,7 @@
 #include<ctime>   
 #include<cstdlib> 
 #include<climits> 
+#include <vector>
 using namespace std;
 
 //TO DO: use this instead of namesArray and dateArray
@@ -226,8 +227,79 @@ int get_date_value(int month, int day, int year)
 
 }
 
+
+void merge(vector<int>& vec, int start, int mid, int end)
+{
+	vector<int> one(vec.begin() + start, vec.begin() + mid + 1);
+	vector<int> two(vec.begin() + mid + 1, vec.begin() + end + 1);
+
+	int a = 0;
+	int b = 0;
+	int index = start;
+	while (a < one.size() && b < two.size())
+	{
+		if (one[a] < two[b])
+			vec[index++] = one[a++];
+		else
+			vec[index++] = two[b++];
+	}
+
+	// merge the left-over elements
+	while (a < one.size())
+		vec[index++] = one[a++];
+	while (b < two.size())
+		vec[index++] = two[b++];
+}
+
+
+void merge_sort(vector<int>& vec, int start, int end)
+{
+	if (start >= end)
+		return;
+
+	int mid = start + (end - start) / 2;
+
+	// single-thread merge-sort
+	merge_sort(vec, start, mid);
+	merge_sort(vec, mid + 1, end);
+	
+
+	merge(vec, start, mid, end);
+}
+
+
+int driver(int numThreads)
+{
+	clock_t startTime = clock();
+
+	int a[] = { 4, 2, 5, 9, 7, 1, 3, 8, 6};
+	vector<int> vec(a, a + 9);
+
+	int mid = (vec.size() - 1) / 2;
+
+	thread first(merge_sort, std::ref(vec), 0, mid);
+	thread second(merge_sort, std::ref(vec), mid + 1, (vec.size() - 1));
+	first.join();
+	second.join();
+	merge(vec, 0, mid, (vec.size() - 1));
+
+
+	for (int i = 0; i < vec.size(); i++)
+		cout << vec[i] << endl;
+
+	clock_t duration = clock() - startTime;
+
+	cout << "Program is finished executing." << endl;
+	double timeElapsed = (double)duration / CLOCKS_PER_SEC;
+	cout << "Time Elapsed = " << timeElapsed << " seconds." << endl;
+
+	return 0;
+}
+
+
 int main()
 {	
+	driver(2);
 	//test_merge_int_serial();
 	//cout << get_date_value(10, 4, 1964);
 	test_merge_string_serial();	
