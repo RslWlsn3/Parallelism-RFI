@@ -3,11 +3,17 @@
 #include<iostream>
 #include<thread>
 #include<string>
-#include<ctime>   
-#include<cstdlib> 
-#include<climits> 
+#include<ctime>
+#include<cstdlib>
+#include<climits>
 #include <vector>
+#include <sstream>
+#include <unordered_map>
 using namespace std;
+
+const int CSV_SIZE = 25038;
+
+
 
 //TO DO: use this instead of namesArray and dateArray
 class csv_data
@@ -15,12 +21,15 @@ class csv_data
 public:
 	string name;
 	string donorStatus;
+	string gradDate;
 	int year;
 	int month;
 	int day;
 	int date_value;
 	string institution;
 };
+
+void convertGradDate(csv_data*);
 
 //creates size amount of random integers in the range of 1 to max size of an int
 int* create_random_nums(int size)
@@ -31,9 +40,9 @@ int* create_random_nums(int size)
 
 	for (int i = 0; i < size; i++)
 	{
-		int x = rand() % INT_MAX;  
+		int x = rand() % INT_MAX;
 		randNums[i] = x;
-	}	
+	}
 	return randNums;
 }
 
@@ -45,41 +54,35 @@ void PrintArray(int *array, int n) {
 
 //TO DO: sort by grad's date if they have the same name, dateArray has #days from current day(not currently being used)
 //Function 2 of 2 for serial merge sort using strings
-void serialMergeString(string namesArray[], int dateArray[], int low, int mid, int high, int size)
+void serialMergeString(csv_data csv_data_array[], int low, int mid, int high, int size)
 {
 	int i = low, j = mid + 1, k = low;
-	string *Temp_name;
-	Temp_name = new string[size];
-	int *Temp_date;
-	Temp_date = new int[size];
+	csv_data *Temp_array;
+	Temp_array = new csv_data[size];
 
 	while (i <= mid && j <= high)
 	{
-		if (namesArray[i] < namesArray[j])
+		if (csv_data_array[i].name < csv_data_array[j].name)
 		{
-			Temp_name[k].assign(namesArray[i]);			
-			Temp_date[k] = dateArray[i];
+			Temp_array[k] = csv_data_array[i];
 			i++;
 		}
-		else if (namesArray[i] == namesArray[j])	//names are the same, use date array
+		else if (csv_data_array[i].name == csv_data_array[j].name)	//names are the same, use date array
 		{
-			if (dateArray[i] < dateArray[j])
+			if (csv_data_array[i].date_value < csv_data_array[j].date_value)
 			{
-				Temp_name[k].assign(namesArray[i]);
-				Temp_date[k] = dateArray[i];
+				Temp_array[k] = csv_data_array[i];
 				i++;
 			}
 			else
 			{
-				Temp_name[k].assign(namesArray[j]);
-				Temp_date[k] = dateArray[j];
+				Temp_array[k] = csv_data_array[j];
 				j++;
 			}
 		}
 		else
 		{
-			Temp_name[k].assign(namesArray[j]);
-			Temp_date[k] = dateArray[j];
+			Temp_array[k] = csv_data_array[j];
 			j++;
 		}
 		k++;
@@ -88,36 +91,33 @@ void serialMergeString(string namesArray[], int dateArray[], int low, int mid, i
 	{
 		for (int h = j; h <= high; h++)
 		{
-			Temp_name[k].assign(namesArray[h]);
-			Temp_date[k] = dateArray[h];
+			Temp_array[k] = csv_data_array[h];
 			k++;
 		}
 	}
 	else
 		for (int h = i; h <= mid; h++)
 		{
-			Temp_name[k].assign(namesArray[h]);
-			Temp_date[k] = dateArray[h];
+			Temp_array[k] = csv_data_array[h];
 			k++;
 		}
 	for (int i = low; i <= high; i++)
 	{
-		namesArray[i].assign(Temp_name[i]);
-		dateArray[i] = Temp_date[i];
+		csv_data_array[i] = Temp_array[i];
 	}
 }
 
 //function 1 of 2 for serial merge sort using strings
-void serialMergeSortString(string namesArray[], int dateArray[], int low, int high, int size)
+void serialMergeSortString(csv_data csv_data_array[], int low, int high, int size)
 {
 	int mid = 0;
-	
+
 	if (low < high)
 	{
 		mid = ((low + high) / 2);
-		serialMergeSortString(namesArray, dateArray, low, mid, size);
-		serialMergeSortString(namesArray, dateArray, mid + 1, high, size);		//might enter threads here
-		serialMergeString(namesArray, dateArray,  low, mid, high, size);
+		serialMergeSortString(csv_data_array, low, mid, size);
+		serialMergeSortString(csv_data_array, mid + 1, high, size);		//might enter threads here
+		serialMergeString(csv_data_array, low, mid, high, size);
 	}
 }
 
@@ -158,7 +158,7 @@ void serialMergeSortint(int numArray[], int low, int high, int size)
 	}
 }
 
-//creates 1 billion (currently only hundred million) random ints and then calls serialMergeSortint to sort them serialy or 
+//creates 1 billion (currently only hundred million) random ints and then calls serialMergeSortint to sort them serialy or
 void test_merge_int_serial()
 {
 	//code to test merge sort with ints
@@ -175,18 +175,21 @@ void test_merge_int_serial()
 void test_merge_string_serial()
 {
 	//code to test merge sort with strings
-	int size= 3;
-	string *nameArray;	
-	nameArray = new string[size]{ "connor", "ann", "connor" }; //need to make all inputs lower or upercase
-	int *dateArray;
-	dateArray = new int[size] {1043, 456, 388};
+	int size = 3;
+	csv_data data[3];
+	data[0].name = "connor";
+	data[1].name = "ann";
+	data[2].name = "connor";
+	data[0].date_value = 1239;
+	data[1].date_value = 402;
+	data[2].date_value = 200;
 
-	serialMergeSortString(nameArray, dateArray, 0, size - 1, size);
+	serialMergeSortString(data, 0, size - 1, size);
 	//print out results
 	for (int i = 0; i < size; i++)
 	{
-		cout << nameArray[i] << "\n date value(# days from current):"<< dateArray[i] << endl;
-	}		
+		cout << data[i].name << data[i].date_value << endl;
+	}
 }
 
 int days_in_month(int year, int month)
@@ -218,7 +221,7 @@ int get_date_value(int month, int day, int year)
 	int current_year = TM.tm_year + 1900;
 	int current_month = TM.tm_mon + 1;
 	int current_day = TM.tm_mday;
-	
+
 	int date_value = 0;
 	date_value += (current_year - year) * 365;
 	date_value += (current_month - month) * days_in_month(year, month);
@@ -226,7 +229,113 @@ int get_date_value(int month, int day, int year)
 	return date_value;
 
 }
+csv_data* readCSV(string fileName) {
+	ifstream file;
+	string temp;
+	file.open(fileName);
+	int i = -1;
 
+	csv_data* alumni = new csv_data[CSV_SIZE];
+
+	if (file.is_open()) {
+		//read from the file
+
+		//ignore the first line
+		file.ignore(200, '\n');
+
+		while (!file.eof()) {
+			i++;
+			//create new csv_data obj
+			csv_data d;
+
+			//trash
+			getline(file, temp, '"');
+
+			//get value
+			getline(file, temp, '"');
+			d.name = temp;
+
+			//trash comma
+			getline(file, temp, ',');
+
+			//get value
+			getline(file, temp, ',');
+			d.donorStatus = temp;
+
+			//trash
+			getline(file, temp, ',');
+			if (temp.empty()) {
+				getline(file, temp, '\n');
+			}
+			else {
+				//parse date
+				temp.erase(0, 1);
+				d.gradDate = temp;
+
+				getline(file, temp, '"');
+				d.gradDate = d.gradDate + "," + temp;
+
+				//trash
+				getline(file, temp, ',');
+				//get inst
+				getline(file, temp, '\n');
+				d.institution = temp;
+			}
+
+			alumni[i] = d;
+		}
+	}
+	else {
+		std::cout << "\nThere was an error opening " << fileName;
+	}
+	convertGradDate(alumni);
+	return alumni;
+
+}
+
+void convertGradDate(csv_data* data) {
+	string value;
+
+	unordered_map<string, int> MONTHS;
+	MONTHS["Jan"] = 1;
+	MONTHS["Feb"] = 2;
+	MONTHS["Mar"] = 3;
+	MONTHS["Apr"] = 4;
+	MONTHS["May"] = 5;
+	MONTHS["Jun"] = 6;
+	MONTHS["Jul"] = 7;
+	MONTHS["Aug"] = 8;
+	MONTHS["Sep"] = 9;
+	MONTHS["Oct"] = 10;
+	MONTHS["Nov"] = 11;
+	MONTHS["Dec"] = 12;
+
+
+	for (int i = 0; i < CSV_SIZE; i++) {
+		// Check if grad date field is populated
+		if (data[i].gradDate.length() != 0) {
+			// Parse grad date field to get individual numbers
+			istringstream iss(data[i].gradDate);
+
+			// Get month value
+			iss >> value;
+
+			data[i].month = MONTHS[value];
+
+			// Get day value
+			iss >> value;
+
+			// Remove comma from end of string
+			value.pop_back();
+			data[i].day = stoi(value);
+
+			// Get year value
+			iss >> value;
+			data[i].year = stoi(value);
+		}
+
+	}
+}
 
 void merge(vector<int>& vec, int start, int mid, int end)
 {
@@ -262,7 +371,7 @@ void merge_sort(vector<int>& vec, int start, int end)
 	// single-thread merge-sort
 	merge_sort(vec, start, mid);
 	merge_sort(vec, mid + 1, end);
-	
+
 
 	merge(vec, start, mid, end);
 }
@@ -298,9 +407,9 @@ int driver(int numThreads)
 
 
 int main()
-{	
+{
 	driver(2);
 	//test_merge_int_serial();
 	//cout << get_date_value(10, 4, 1964);
-	test_merge_string_serial();	
+	test_merge_string_serial();
 }
