@@ -8,6 +8,18 @@
 #include<climits> 
 using namespace std;
 
+//TO DO: use this instead of namesArray and dateArray
+class csv_data
+{
+public:
+	string name;
+	string donorStatus;
+	int year;
+	int month;
+	int day;
+	int date_value;
+	string institution;
+};
 
 //creates size amount of random integers in the range of 1 to max size of an int
 int* create_random_nums(int size)
@@ -31,23 +43,42 @@ void PrintArray(int *array, int n) {
 }
 
 //TO DO: sort by grad's date if they have the same name, dateArray has #days from current day(not currently being used)
-//Function 1 of 2 for serial merge sort using strings
+//Function 2 of 2 for serial merge sort using strings
 void serialMergeString(string namesArray[], int dateArray[], int low, int mid, int high, int size)
 {
 	int i = low, j = mid + 1, k = low;
-	string *Temp;
-	Temp = new string[size];
+	string *Temp_name;
+	Temp_name = new string[size];
+	int *Temp_date;
+	Temp_date = new int[size];
 
 	while (i <= mid && j <= high)
 	{
 		if (namesArray[i] < namesArray[j])
 		{
-			Temp[k].assign(namesArray[i]);
+			Temp_name[k].assign(namesArray[i]);			
+			Temp_date[k] = dateArray[i];
 			i++;
+		}
+		else if (namesArray[i] == namesArray[j])	//names are the same, use date array
+		{
+			if (dateArray[i] < dateArray[j])
+			{
+				Temp_name[k].assign(namesArray[i]);
+				Temp_date[k] = dateArray[i];
+				i++;
+			}
+			else
+			{
+				Temp_name[k].assign(namesArray[j]);
+				Temp_date[k] = dateArray[j];
+				j++;
+			}
 		}
 		else
 		{
-			Temp[k].assign(namesArray[j]);
+			Temp_name[k].assign(namesArray[j]);
+			Temp_date[k] = dateArray[j];
 			j++;
 		}
 		k++;
@@ -56,23 +87,26 @@ void serialMergeString(string namesArray[], int dateArray[], int low, int mid, i
 	{
 		for (int h = j; h <= high; h++)
 		{
-			Temp[k].assign(namesArray[h]);
+			Temp_name[k].assign(namesArray[h]);
+			Temp_date[k] = dateArray[h];
 			k++;
 		}
 	}
 	else
 		for (int h = i; h <= mid; h++)
 		{
-			Temp[k].assign(namesArray[h]);
+			Temp_name[k].assign(namesArray[h]);
+			Temp_date[k] = dateArray[h];
 			k++;
 		}
 	for (int i = low; i <= high; i++)
 	{
-		namesArray[i].assign(Temp[i]);
+		namesArray[i].assign(Temp_name[i]);
+		dateArray[i] = Temp_date[i];
 	}
 }
 
-//function 2 of 2 for serial merge sort using strings
+//function 1 of 2 for serial merge sort using strings
 void serialMergeSortString(string namesArray[], int dateArray[], int low, int high, int size)
 {
 	int mid = 0;
@@ -81,7 +115,7 @@ void serialMergeSortString(string namesArray[], int dateArray[], int low, int hi
 	{
 		mid = ((low + high) / 2);
 		serialMergeSortString(namesArray, dateArray, low, mid, size);
-		serialMergeSortString(namesArray, dateArray, mid + 1, high, size);
+		serialMergeSortString(namesArray, dateArray, mid + 1, high, size);		//might enter threads here
 		serialMergeString(namesArray, dateArray,  low, mid, high, size);
 	}
 }
@@ -141,15 +175,17 @@ void test_merge_string_serial()
 {
 	//code to test merge sort with strings
 	int size= 3;
-	string *nameArray;
-	nameArray = new string[size]{ "John", "Connor", "bill" };
+	string *nameArray;	
+	nameArray = new string[size]{ "connor", "ann", "connor" }; //need to make all inputs lower or upercase
 	int *dateArray;
-	dateArray = new int[size] {1043, 356, 488};
+	dateArray = new int[size] {1043, 456, 388};
 
 	serialMergeSortString(nameArray, dateArray, 0, size - 1, size);
 	//print out results
 	for (int i = 0; i < size; i++)
-		cout << nameArray[i] << endl;
+	{
+		cout << nameArray[i] << "\n date value(# days from current):"<< dateArray[i] << endl;
+	}		
 }
 
 int days_in_month(int year, int month)
@@ -194,6 +230,5 @@ int main()
 {	
 	//test_merge_int_serial();
 	//cout << get_date_value(10, 4, 1964);
-	test_merge_string_serial();
-	
+	test_merge_string_serial();	
 }
