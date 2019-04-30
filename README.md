@@ -7,14 +7,9 @@ call create_random_nums(size) with size being # of random numbers to be generate
 
 calling test_merge_int_serial() creates 100 mil random ints and then sorts them 
 
+
 code form Nathan to parse file:
-/* CSV Parser by Nathan Teeter
- *
- * "She may not look like much, but she's got it where it counts, kid.
- * I've added some special modifications myself.
- * But we're a little rushed, so if you'll just get on-board, we'll get outta here."
- * 																- Han Solo (0 BBY)
- */
+
  std::vector <csv_data> csvParser(const std::string fileName) {
     //local vars
     std::string temp;
