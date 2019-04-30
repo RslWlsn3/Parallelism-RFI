@@ -44,7 +44,7 @@ void PrintArray(int *array, int n) {
 
 //TO DO: sort by grad's date if they have the same name, dateArray has #days from current day(not currently being used)
 //Function 2 of 2 for serial merge sort using strings
-void serialMergeString(string namesArray[], int dateArray[], int low, int mid, int high, int size)
+void serialMergeString(csv_data csv_data_array[], int low, int mid, int high, int size)
 {
 	int i = low, j = mid + 1, k = low;
 	string *Temp_name;
@@ -54,31 +54,31 @@ void serialMergeString(string namesArray[], int dateArray[], int low, int mid, i
 
 	while (i <= mid && j <= high)
 	{
-		if (namesArray[i] < namesArray[j])
+		if (csv_data_array[i].name < csv_data_array[j].name)
 		{
-			Temp_name[k].assign(namesArray[i]);			
-			Temp_date[k] = dateArray[i];
+			Temp_name[k].assign(csv_data_array[i].name);
+			Temp_date[k] = csv_data_array[i].date_value;
 			i++;
 		}
-		else if (namesArray[i] == namesArray[j])	//names are the same, use date array
+		else if (csv_data_array[i].name == csv_data_array[j].name)	//names are the same, use date array
 		{
-			if (dateArray[i] < dateArray[j])
+			if (csv_data_array[i] < csv_data_array[j])
 			{
-				Temp_name[k].assign(namesArray[i]);
-				Temp_date[k] = dateArray[i];
+				Temp_name[k].assign(csv_data_array[i].name);
+				Temp_date[k] = csv_data_array[i].date_value;
 				i++;
 			}
 			else
 			{
-				Temp_name[k].assign(namesArray[j]);
-				Temp_date[k] = dateArray[j];
+				Temp_name[k].assign(csv_data_array[j].name);
+				Temp_date[k] = csv_data_array[j].date_value;
 				j++;
 			}
 		}
 		else
 		{
-			Temp_name[k].assign(namesArray[j]);
-			Temp_date[k] = dateArray[j];
+			Temp_name[k].assign(csv_data_array[j].name);
+			Temp_date[k] = csv_data_array[j].date_value;
 			j++;
 		}
 		k++;
@@ -87,22 +87,22 @@ void serialMergeString(string namesArray[], int dateArray[], int low, int mid, i
 	{
 		for (int h = j; h <= high; h++)
 		{
-			Temp_name[k].assign(namesArray[h]);
-			Temp_date[k] = dateArray[h];
+			Temp_name[k].assign(csv_data_array[h].name);
+			Temp_date[k] = csv_data_array[h].date_value;
 			k++;
 		}
 	}
 	else
 		for (int h = i; h <= mid; h++)
 		{
-			Temp_name[k].assign(namesArray[h]);
-			Temp_date[k] = dateArray[h];
+			Temp_name[k].assign(csv_data_array[h].name);
+			Temp_date[k] = csv_data_array[h].date_value;
 			k++;
 		}
 	for (int i = low; i <= high; i++)
 	{
-		namesArray[i].assign(Temp_name[i]);
-		dateArray[i] = Temp_date[i];
+		csv_data_array[i].name.assign(Temp_name[i]);
+		csv_data_array[i].date_value = Temp_date[i];
 	}
 }
 
