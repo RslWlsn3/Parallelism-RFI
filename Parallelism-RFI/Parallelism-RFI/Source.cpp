@@ -21,7 +21,7 @@ public:
 	int month;
 	int day;
 	int date_value;
-	string institution;
+	string institution;	
 };
 
 //creates size amount of random integers in the range of 1 to max size of an int
@@ -50,38 +50,32 @@ void PrintArray(int *array, int n) {
 void serialMergeString(csv_data csv_data_array[], int low, int mid, int high, int size)
 {
 	int i = low, j = mid + 1, k = low;
-	string *Temp_name;
-	Temp_name = new string[size];
-	int *Temp_date;
-	Temp_date = new int[size];
+	csv_data *Temp_array;
+	Temp_array = new csv_data[size];
 
 	while (i <= mid && j <= high)
 	{
 		if (csv_data_array[i].name < csv_data_array[j].name)
-		{
-			Temp_name[k].assign(csv_data_array[i].name);
-			Temp_date[k] = csv_data_array[i].date_value;
+		{			
+			Temp_array[k] = csv_data_array[i];
 			i++;
 		}
 		else if (csv_data_array[i].name == csv_data_array[j].name)	//names are the same, use date array
 		{
-			if (csv_data_array[i] < csv_data_array[j])
-			{
-				Temp_name[k].assign(csv_data_array[i].name);
-				Temp_date[k] = csv_data_array[i].date_value;
+			if (csv_data_array[i].date_value < csv_data_array[j].date_value)
+			{				
+				Temp_array[k] = csv_data_array[i];
 				i++;
 			}
 			else
 			{
-				Temp_name[k].assign(csv_data_array[j].name);
-				Temp_date[k] = csv_data_array[j].date_value;
+				Temp_array[k] = csv_data_array[j];
 				j++;
 			}
 		}
 		else
 		{
-			Temp_name[k].assign(csv_data_array[j].name);
-			Temp_date[k] = csv_data_array[j].date_value;
+			Temp_array[k] = csv_data_array[j];
 			j++;
 		}
 		k++;
@@ -89,37 +83,34 @@ void serialMergeString(csv_data csv_data_array[], int low, int mid, int high, in
 	if (i > mid)
 	{
 		for (int h = j; h <= high; h++)
-		{
-			Temp_name[k].assign(csv_data_array[h].name);
-			Temp_date[k] = csv_data_array[h].date_value;
+		{			
+			Temp_array[k] = csv_data_array[h];
 			k++;
 		}
 	}
 	else
 		for (int h = i; h <= mid; h++)
 		{
-			Temp_name[k].assign(csv_data_array[h].name);
-			Temp_date[k] = csv_data_array[h].date_value;
+			Temp_array[k] = csv_data_array[h];
 			k++;
 		}
 	for (int i = low; i <= high; i++)
 	{
-		csv_data_array[i].name.assign(Temp_name[i]);
-		csv_data_array[i].date_value = Temp_date[i];
+		csv_data_array[i] = Temp_array[i];
 	}
 }
 
 //function 1 of 2 for serial merge sort using strings
-void serialMergeSortString(string namesArray[], int dateArray[], int low, int high, int size)
+void serialMergeSortString(csv_data csv_data_array[], int low, int high, int size)
 {
 	int mid = 0;
 	
 	if (low < high)
 	{
 		mid = ((low + high) / 2);
-		serialMergeSortString(namesArray, dateArray, low, mid, size);
-		serialMergeSortString(namesArray, dateArray, mid + 1, high, size);		//might enter threads here
-		serialMergeString(namesArray, dateArray,  low, mid, high, size);
+		serialMergeSortString(csv_data_array, low, mid, size);
+		serialMergeSortString(csv_data_array, mid + 1, high, size);		//might enter threads here
+		serialMergeString(csv_data_array, low, mid, high, size);
 	}
 }
 
@@ -177,17 +168,20 @@ void test_merge_int_serial()
 void test_merge_string_serial()
 {
 	//code to test merge sort with strings
-	int size= 3;
-	string *nameArray;	
-	nameArray = new string[size]{ "connor", "ann", "connor" }; //need to make all inputs lower or upercase
-	int *dateArray;
-	dateArray = new int[size] {1043, 456, 388};
+	int size = 3;
+	csv_data data[3];
+	data[0].name = "connor";
+	data[1].name = "ann";
+	data[2].name = "connor";
+	data[0].date_value = 1239;
+	data[1].date_value = 402;
+	data[2].date_value = 200;	
 
-	serialMergeSortString(nameArray, dateArray, 0, size - 1, size);
+	serialMergeSortString(data, 0, size - 1, size);
 	//print out results
 	for (int i = 0; i < size; i++)
 	{
-		cout << nameArray[i] << "\n date value(# days from current):"<< dateArray[i] << endl;
+		cout << data[i].name << data[i].date_value << endl;
 	}		
 }
 
@@ -295,8 +289,7 @@ csv_data* readCSV(string fileName) {
 
 int main(int argc, char*argv[])
 {	
-	//test_merge_int_serial();
-	//cout << get_date_value(10, 4, 1964);
+	//test_merge_int_serial();	
 	//test_merge_string_serial();	
 	csv_data* data;
 	data = readCSV(argv[1]);
