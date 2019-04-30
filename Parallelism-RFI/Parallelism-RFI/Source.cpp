@@ -1,6 +1,5 @@
 //RFI
 #define _CRT_SECURE_NO_WARNINGS
-const int CSV_SIZE = 25038;
 #include<iostream>
 #include<thread>
 #include<string>
@@ -8,7 +7,13 @@ const int CSV_SIZE = 25038;
 #include<cstdlib> 
 #include<climits> 
 #include<fstream>
+#include<sstream>
+#include<unordered_map>
 using namespace std;
+
+const int CSV_SIZE = 25038;
+
+
 
 //TO DO: use this instead of namesArray and dateArray
 class csv_data
@@ -23,6 +28,8 @@ public:
 	int date_value;
 	string institution;	
 };
+
+void convertGradDate(csv_data*);
 
 //creates size amount of random integers in the range of 1 to max size of an int
 int* create_random_nums(int size)
@@ -282,9 +289,53 @@ csv_data* readCSV(string fileName) {
 	else {
 		std::cout << "\nThere was an error opening " << fileName;
 	}
-
+	convertGradDate(alumni);
 	return alumni;
 
+}
+
+void convertGradDate(csv_data* data) {
+	string value;
+
+	unordered_map<string, int> MONTHS;
+	MONTHS["Jan"] = 1;
+	MONTHS["Feb"] = 2;
+	MONTHS["Mar"] = 3;
+	MONTHS["Apr"] = 4;
+	MONTHS["May"] = 5;
+	MONTHS["Jun"] = 6;
+	MONTHS["Jul"] = 7;
+	MONTHS["Aug"] = 8;
+	MONTHS["Sep"] = 9;
+	MONTHS["Oct"] = 10;
+	MONTHS["Nov"] = 11;
+	MONTHS["Dec"] = 12;
+
+
+	for (int i = 0; i < CSV_SIZE; i++) {
+		// Check if grad date field is populated
+		if (data[i].gradDate.length() != 0) {
+			// Parse grad date field to get individual numbers
+			istringstream iss(data[i].gradDate);
+
+			// Get month value
+			iss >> value;
+
+			data[i].month = MONTHS[value];
+
+			// Get day value
+			iss >> value;
+
+			// Remove comma from end of string
+			value.pop_back();
+			data[i].day = stoi(value);
+
+			// Get year value
+			iss >> value;
+			data[i].year = stoi(value);
+		}
+		
+	}
 }
 
 int main(int argc, char*argv[])
@@ -293,4 +344,6 @@ int main(int argc, char*argv[])
 	//test_merge_string_serial();	
 	csv_data* data;
 	data = readCSV(argv[1]);
+	
+	//cout << data[3].name << data[3].day << data[3].month << data[3].year << endl;
 }
