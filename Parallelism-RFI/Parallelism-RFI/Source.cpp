@@ -425,11 +425,11 @@ int main(int argc, char*argv[])
 			nameFirst = true;
 		}
 		CSVInput = argv[4];
-		output = "output.csv";
+		output = argv[5];
 	}
 	else {
 		numsToSort = stoi(argv[3]);
-		output = "output.txt";
-		sortedOutput = "sorted.txt";
+		output = argv[4];
+		sortedOutput = argv[5];
 	}
 }
