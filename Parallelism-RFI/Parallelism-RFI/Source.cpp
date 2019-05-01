@@ -45,19 +45,35 @@ public:
 
 void convertGradDate(csv_data*);
 
+class randomInts
+{
+public:
+	int randomNum;
+
+	template<typename T>
+	T first(char flag = NULL) {
+		return randomNum;
+	}
+	template<typename T>
+	T second(char flag = NULL) {
+		return randomNum;
+	}
+};
+
 //creates size amount of random integers in the range of 1 to max size of an int
-int* create_random_nums(int size)
+vector<randomInts> create_random_nums(int size)
 {
 	srand(time(NULL));
-	int * randNums;
-	randNums = new int [size];
+	vector<randomInts> randomNumVector;
 
 	for (int i = 0; i < size; i++)
 	{
 		int x = rand() % INT_MAX;
-		randNums[i] = x;
+		randomInts ri;
+		ri.randomNum = x;
+		randomNumVector.push_back(ri);
 	}
-	return randNums;
+	return randomNumVector;
 }
 
 void PrintArray(int *array, int n) {
@@ -135,6 +151,7 @@ void serialMergeSortString(csv_data csv_data_array[], int low, int high, int siz
 	}
 }
 
+
 //function 1 of 2 for serial merge sort using ints
 void serialMergeint(int numArray[], int low, int  mid, int high) {
 	int *temp = new int[high - low + 1];//temporary merger array
@@ -172,19 +189,19 @@ void serialMergeSortint(int numArray[], int low, int high, int size)
 	}
 }
 
-//creates 1 billion (currently only hundred million) random ints and then calls serialMergeSortint to sort them serialy or
-void test_merge_int_serial()
-{
-	//code to test merge sort with ints
-	int size = 100000000;	//crashes when I add another 0
-	int* arr = create_random_nums(size);
-
-	serialMergeSortint(arr, 0, size - 1, size);
-
-	//print out results
-	for (int i = 0; i < size; i++)
-		cout << arr[i] << endl;
-}
+////creates 1 billion (currently only hundred million) random ints and then calls serialMergeSortint to sort them serialy or
+//void test_merge_int_serial()
+//{
+//	//code to test merge sort with ints
+//	int size = 100000000;	//crashes when I add another 0
+//	int* arr = create_random_nums(size);
+//
+//	serialMergeSortint(arr, 0, size - 1, size);
+//
+//	//print out results
+//	for (int i = 0; i < size; i++)
+//		cout << arr[i] << endl;
+//}
 
 void test_merge_string_serial()
 {
@@ -462,7 +479,7 @@ void driver()
 	*/
 
 	clock_t duration = clock() - startTime;
-	
+
 	//for (int i = 0; i < vec.size(); i++)
 	//	cout << vec[i] << endl;
 
@@ -475,8 +492,40 @@ void driver()
 
 int main(int argc, char*argv[])
 {
-	driver();
+	//driver(2);
 	//test_merge_int_serial();
 	//cout << get_date_value(10, 4, 1964);
+	csv_data *csv_d;
+	csv_d = readCSV("alumni.csv");
+	clock_t startTime = clock();
+	serialMergeSortString(csv_d, 0, CSV_SIZE - 1, CSV_SIZE);
+	clock_t duration = clock() - startTime;
+	for (int i = 0; i < CSV_SIZE; i++)
+	{
+		cout << csv_d[i].name << endl;
+	}
+	cout << duration;
 
+	//test_merge_string_serial();
+	/*int numberOfThreads = stoi(argv[1]), numsToSort;
+	bool readCSV = false, nameFirst = false;
+	string CSVInput, output, sortedOutput;
+
+	if (argv[2] == "a") {
+		readCSV = true;
+		if (argv[3] == "n") {
+			nameFirst = true;
+		}
+		CSVInput = argv[4];
+		output = argv[5];
+	}
+	else {
+		vector<randomInts> randomNumVector;
+		randomNumVector = create_random_nums(stoi(argv[3]));
+		merge_sort<randomInts>(randomNumVector, 0, stoi(argv[3]));
+		for (int i = 0; i < stoi(argv[3]); i++)
+		{
+			cout << randomNumVector[i].randomNum;
+		}
+	}*/
 }
