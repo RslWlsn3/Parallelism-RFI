@@ -27,7 +27,7 @@ public:
 	int month;
 	int day;
 	int date_value;
-	string institution;
+	string institution;	
 };
 
 void convertGradDate(csv_data*);
