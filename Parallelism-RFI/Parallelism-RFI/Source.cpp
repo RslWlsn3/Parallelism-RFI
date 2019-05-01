@@ -384,18 +384,29 @@ void merge_sort(vector<T>& vec, int start, int end)
 
 int driver(int numThreads)
 {
+	thread * threads;
+	threads = new thread[numThreads];
 	clock_t startTime = clock();
 
 	int a[] = {4, 2, 5, 9, 7, 1, 3, 8, 6};
 	vector<int> vec(a, a + 9);
 
-	int mid = (vec.size() - 1) / 2;
+	int range = (vec.size() - 1) / numThreads;
 
-	thread first(merge_sort<int>, std::ref(vec), 0, mid);
-	thread second(merge_sort<int>, std::ref(vec), mid + 1, (vec.size() - 1));
+	thread first(merge_sort<int>, std::ref(vec), 0, range);
+	thread second(merge_sort<int>, std::ref(vec), range + 1, (vec.size() - 1));
 	first.join();
 	second.join();
-	merge(vec, 0, mid, (vec.size() - 1));
+	merge(vec, 0, range, (vec.size() - 1));
+
+	for (int i = 0; i < numThreads; i++) {
+
+		threads[i] = thread(merge_sort<int>, std::ref(vec), (i * range), ((i * range) + range));
+	}
+	for (int i = 0; i < numThreads; i++) {
+		threads[i].join();
+	}
+	merge(vec, 0, ((vec.size() - 1) / 2), (vec.size() - 1));
 
 
 	for (int i = 0; i < vec.size(); i++)
@@ -413,7 +424,7 @@ int driver(int numThreads)
 
 int main()
 {
-	driver(2);
+	driver(3);
 	//test_merge_int_serial();
 	//cout << get_date_value(10, 4, 1964);
 	test_merge_string_serial();
