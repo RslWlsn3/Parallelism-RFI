@@ -1,13 +1,14 @@
 //RFI
 #define _CRT_SECURE_NO_WARNINGS
-#include<iostream>
-#include<thread>
-#include<string>
-#include<ctime>
-#include<cstdlib>
-#include<climits>
+#include <iostream>
+#include <thread>
+#include <string>
+#include <ctime>
+#include <cstdlib>
+#include <climits>
 #include <vector>
 #include <sstream>
+#include <fstream>
 #include <unordered_map>
 using namespace std;
 
@@ -340,10 +341,11 @@ void convertGradDate(csv_data* data) {
 	}
 }
 
-void merge(vector<int>& vec, int start, int mid, int end)
+template <typename T>
+void merge(vector<T>& vec, int start, int mid, int end)
 {
-	vector<int> one(vec.begin() + start, vec.begin() + mid + 1);
-	vector<int> two(vec.begin() + mid + 1, vec.begin() + end + 1);
+	vector<T> one(vec.begin() + start, vec.begin() + mid + 1);
+	vector<T> two(vec.begin() + mid + 1, vec.begin() + end + 1);
 
 	int a = 0;
 	int b = 0;
@@ -363,8 +365,8 @@ void merge(vector<int>& vec, int start, int mid, int end)
 		vec[index++] = two[b++];
 }
 
-
-void merge_sort(vector<int>& vec, int start, int end)
+template <typename T>
+void merge_sort(vector<T>& vec, int start, int end)
 {
 	if (start >= end)
 		return;
@@ -384,13 +386,13 @@ int driver(int numThreads)
 {
 	clock_t startTime = clock();
 
-	int a[] = { 4, 2, 5, 9, 7, 1, 3, 8, 6};
+	int a[] = {4, 2, 5, 9, 7, 1, 3, 8, 6};
 	vector<int> vec(a, a + 9);
 
 	int mid = (vec.size() - 1) / 2;
 
-	thread first(merge_sort, std::ref(vec), 0, mid);
-	thread second(merge_sort, std::ref(vec), mid + 1, (vec.size() - 1));
+	thread first(merge_sort<int>, std::ref(vec), 0, mid);
+	thread second(merge_sort<int>, std::ref(vec), mid + 1, (vec.size() - 1));
 	first.join();
 	second.join();
 	merge(vec, 0, mid, (vec.size() - 1));
