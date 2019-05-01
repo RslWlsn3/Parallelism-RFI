@@ -332,6 +332,9 @@ void convertGradDate(csv_data* data) {
 			// Get year value
 			iss >> value;
 			data[i].year = stoi(value);
+
+			// Calculate days since graduation
+			data[i].date_value = get_date_value(data[i].month, data[i].day, data[i].year);
 		}
 
 	}
