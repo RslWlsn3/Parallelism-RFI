@@ -8,6 +8,7 @@
 #include<climits>
 #include <vector>
 #include <sstream>
+#include <fstream>
 #include <unordered_map>
 using namespace std;
 
@@ -409,10 +410,26 @@ int driver(int numThreads)
 }
 
 
-int main()
+int main(int argc, char*argv[])
 {
 	driver(2);
 	//test_merge_int_serial();
 	//cout << get_date_value(10, 4, 1964);
 	test_merge_string_serial();
+	int numberOfThreads = stoi(argv[1]), numsToSort;
+	bool readCSV = false, nameFirst = false;
+	string CSVInput, output, sortedOutput;
+	if (argv[2] == "a") {
+		readCSV = true;
+		if (argv[3] == "n") {
+			nameFirst = true;
+		}
+		CSVInput = argv[4];
+		output = "output.csv";
+	}
+	else {
+		numsToSort = stoi(argv[3]);
+		output = "output.txt";
+		sortedOutput = "sorted.txt";
+	}
 }
