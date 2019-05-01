@@ -398,27 +398,73 @@ void driver()
 {
 
 	vector<int> vec;
-	for (long long int i = 0; i < 99999999; i++) {
+	for (long long int i = 0; i < 100000000; i++) {
 		int x = rand() % INT_MAX;
 		vec.push_back(x);
 	}
 
 	clock_t startTime = clock();
 
-	//int a[] = {4, 2, 1, 9, 7, 3, 5, 8, 6};
-	//vector<int> vec(a, a + 9);
+	int numThreads = 4;
+	long long int range = vec.size() / numThreads;
+	thread * threads;
+	threads = new thread[numThreads];
+	long long int low = 0;
+	long long int high = range;
+	for (int i = 0; i < numThreads; i++) {
+		if (i + 1 == numThreads) {
+			high = (vec.size() - 1);
+		}
+		threads[i] = thread(merge_sort<int>, std::ref(vec), low, high);
+		low = high + 1;
+		high = range + high;
+	}
 
-	thread first(merge_sort<int>, std::ref(vec), 0, 50000000);
-	thread second(merge_sort<int>, std::ref(vec), 50000001, 99999999);
+	for (int i = 0; i < numThreads; i++) {
+		threads[i].join();
+	}
+
+	high = range + range;
+	long long int mid = range;
+	for (int i = 0; i < (numThreads - 1); i++) {
+		if (i + 1 == (numThreads - 1)) {
+			high = (vec.size() - 1);
+		}
+		merge(vec, 0, mid, high);
+		mid = high;
+		high = range + high;
+	}
+
+	delete[] threads;
+	threads = nullptr;
+
+	//merge(vec, 0, range, (vec.size() - 1));
+	/*
+	thread first(merge_sort<int>, std::ref(vec), 0, 12500000);
+	thread second(merge_sort<int>, std::ref(vec), 12500001, 25000000);
+	thread third(merge_sort<int>, std::ref(vec), 25000001, 37500000);
+	thread forth(merge_sort<int>, std::ref(vec), 37500001, 50000000);
+	thread fifth(merge_sort<int>, std::ref(vec), 50000001, 62500000);
+	thread six(merge_sort<int>, std::ref(vec), 62500001, 75000000);
+	thread seven(merge_sort<int>, std::ref(vec), 75000001, 87500000);
+	thread eight(merge_sort<int>, std::ref(vec), 87500001, 99999999);
 
 	first.join();
 	second.join();
+	third.join();
+	forth.join();
+	fifth.join();
+	six.join();
+	seven.join();
+	eight.join();
+
 	merge(vec, 0, 50000000, 99999999);
+	*/
 
 	clock_t duration = clock() - startTime;
 	
-	for (int i = 0; i < vec.size(); i++)
-		cout << vec[i] << endl;
+	//for (int i = 0; i < vec.size(); i++)
+	//	cout << vec[i] << endl;
 
 	cout << "Program is finished executing." << endl;
 	double timeElapsed = (double)duration / CLOCKS_PER_SEC;
