@@ -17,6 +17,7 @@ const int CSV_SIZE = 25038;
 
 
 //TO DO: use this instead of namesArray and dateArray
+
 class csv_data
 {
 public:
@@ -28,7 +29,19 @@ public:
 	int day;
 	int date_value;
 	string institution;
+
+
+	template<typename T>
+	T first(char flag) {
+		return (flag == 'n' ? name : date_value);
+	}
+	template<typename T>
+	T second(char flag) {
+		return (flag == 'n' ? date_value : name);
+	}
 };
+
+
 
 void convertGradDate(csv_data*);
 
