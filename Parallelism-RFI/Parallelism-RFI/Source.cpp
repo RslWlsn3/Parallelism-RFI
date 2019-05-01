@@ -45,19 +45,35 @@ public:
 
 void convertGradDate(csv_data*);
 
+class randomInts
+{
+public:
+	int randomNum;
+
+	template<typename T>
+	T first(char flag = NULL) {
+		return randomNum;
+	}
+	template<typename T>
+	T second(char flag = NULL) {
+		return randomNum;
+	}
+};
+
 //creates size amount of random integers in the range of 1 to max size of an int
-int* create_random_nums(int size)
+vector<randomInts> create_random_nums(int size)
 {
 	srand(time(NULL));
-	int * randNums;
-	randNums = new int [size];
+	vector<randomInts> randomNumVector;
 
 	for (int i = 0; i < size; i++)
 	{
 		int x = rand() % INT_MAX;
-		randNums[i] = x;
+		randomInts ri;
+		ri.randomNum = x;
+		randomNumVector.push_back(ri);
 	}
-	return randNums;
+	return randomNumVector;
 }
 
 void PrintArray(int *array, int n) {
@@ -135,6 +151,7 @@ void serialMergeSortString(csv_data csv_data_array[], int low, int high, int siz
 	}
 }
 
+
 //function 1 of 2 for serial merge sort using ints
 void serialMergeint(int numArray[], int low, int  mid, int high) {
 	int *temp = new int[high - low + 1];//temporary merger array
@@ -172,19 +189,19 @@ void serialMergeSortint(int numArray[], int low, int high, int size)
 	}
 }
 
-//creates 1 billion (currently only hundred million) random ints and then calls serialMergeSortint to sort them serialy or
-void test_merge_int_serial()
-{
-	//code to test merge sort with ints
-	int size = 100000000;	//crashes when I add another 0
-	int* arr = create_random_nums(size);
-
-	serialMergeSortint(arr, 0, size - 1, size);
-
-	//print out results
-	for (int i = 0; i < size; i++)
-		cout << arr[i] << endl;
-}
+////creates 1 billion (currently only hundred million) random ints and then calls serialMergeSortint to sort them serialy or
+//void test_merge_int_serial()
+//{
+//	//code to test merge sort with ints
+//	int size = 100000000;	//crashes when I add another 0
+//	int* arr = create_random_nums(size);
+//
+//	serialMergeSortint(arr, 0, size - 1, size);
+//
+//	//print out results
+//	for (int i = 0; i < size; i++)
+//		cout << arr[i] << endl;
+//}
 
 void test_merge_string_serial()
 {
@@ -356,118 +373,130 @@ void convertGradDate(csv_data* data) {
 int threadCount = 0;
 int threadSize = 3;
 
-template <typename T>
-void merge(vector<T>& vec, int start, int mid, int end)
-{
-	vector<T> one(vec.begin() + start, vec.begin() + mid + 1);
-	vector<T> two(vec.begin() + mid + 1, vec.begin() + end + 1);
+//template <typename T>
+//void merge(vector<T>& vec, int start, int mid, int end)
+//{
+//	vector<T> one(vec.begin() + start, vec.begin() + mid + 1);
+//	vector<T> two(vec.begin() + mid + 1, vec.begin() + end + 1);
+//
+//	int a = 0;
+//	int b = 0;
+//	int index = start;
+//	while (a < one.size() && b < two.size())
+//	{
+//		if (one[a].first('x') < two[b].first('x'))
+//			vec[index++] = one[a++];
+//		else
+//			vec[index++] = two[b++];
+//	}
+//
+//	// merge the left-over elements
+//	while (a < one.size())
+//		vec[index++] = one[a++];
+//	while (b < two.size())
+//		vec[index++] = two[b++];
+//}
+//
+//template <typename T>
+//void merge_sort(vector<T>& vec, int start, int end)
+//{
+//	if (start >= end)
+//		return;
+//
+//	int mid = start + (end - start) / 2;
+//
+//	if (threadCount < threadSize - 1) {
+//		threadCount++;
+//		thread first(merge_sort<T>, std::ref(vec), 0, mid);
+//		threadCount++;
+//		thread second(merge_sort<T>, std::ref(vec), mid + 1, (vec.size() - 1));
+//		first.join();
+//		second.join();
+//		merge(vec, 0, mid, (vec.size() - 1));
+//	}
+//	else if (threadCount < threadSize) {
+//		threadCount++;
+//		thread first(merge_sort<T>, std::ref(vec), 0, mid);
+//		merge_sort<T>(vec, mid + 1, (vec.size() - 1));
+//		first.join();
+//		merge(vec, 0, mid, (vec.size() - 1));
+//	}
+//	else {
+//		// single-thread merge-sort
+//		merge_sort(vec, start, mid);
+//		merge_sort(vec, mid + 1, end);
+//	}
+//
+//	merge(vec, start, mid, end);
+//}
 
-	int a = 0;
-	int b = 0;
-	int index = start;
-	while (a < one.size() && b < two.size())
-	{
-		if (one[a] < two[b])
-			vec[index++] = one[a++];
-		else
-			vec[index++] = two[b++];
-	}
-
-	// merge the left-over elements
-	while (a < one.size())
-		vec[index++] = one[a++];
-	while (b < two.size())
-		vec[index++] = two[b++];
-}
-
-template <typename T>
-void merge_sort(vector<T>& vec, int start, int end)
-{
-	if (start >= end)
-		return;
-
-	int mid = start + (end - start) / 2;
-
-	if (threadCount < threadSize - 1) {
-		threadCount++;
-		thread first(merge_sort<int>, std::ref(vec), 0, mid);
-		threadCount++;
-		thread second(merge_sort<int>, std::ref(vec), mid + 1, (vec.size() - 1));
-		first.join();
-		second.join();
-		merge(vec, 0, mid, (vec.size() - 1));
-	}
-	else if (threadCount < threadSize) {
-		threadCount++;
-		thread first(merge_sort<int>, std::ref(vec), 0, mid);
-		merge_sort<int>(vec, mid + 1, (vec.size() - 1));
-		first.join();
-		merge(vec, 0, mid, (vec.size() - 1));
-	}
-	else {
-		// single-thread merge-sort
-		merge_sort(vec, start, mid);
-		merge_sort(vec, mid + 1, end);
-	}
-
-	merge(vec, start, mid, end);
-}
-
-int driver(int numThreads)
-{
-	thread * threads;
-	threads = new thread[numThreads];
-	clock_t startTime = clock();
-
-	int a[] = {4, 2, 1, 9, 7, 3, 5, 8, 6};
-	vector<int> vec(a, a + 9);
-
-	//int mid = (vec.size() - 1) / 2;
-	merge_sort<int>(vec, 0, (vec.size() - 1));
-	/*
-	thread first(merge_sort<int>, std::ref(vec), 0, range);
-	thread second(merge_sort<int>, std::ref(vec), range + 1, (vec.size() - 1));
-	first.join();
-	second.join();
-	merge(vec, 0, range, (vec.size() - 1));
-	
-
-	int lower = 0;
-	int upper = range;
-
-	for (int i = 0; i < numThreads; i++) {
-		threads[i] = thread(merge_sort<int>, std::ref(vec), lower, upper);
-		lower = (upper + 1);
-		upper = (upper + 1) + range;
-	}
-	for (int i = 0; i < numThreads; i++) {
-		threads[i].join();
-	}
-	merge(vec, 0, ((vec.size() - 1) / 2), (vec.size() - 1));
-	*/
-
-	for (int i = 0; i < vec.size(); i++)
-		cout << vec[i] << endl;
-
-	clock_t duration = clock() - startTime;
-
-	cout << "Program is finished executing." << endl;
-	double timeElapsed = (double)duration / CLOCKS_PER_SEC;
-	cout << "Time Elapsed = " << timeElapsed << " seconds." << endl;
-
-	return 0;
-}
+//int driver(int numThreads)
+//{
+//	thread * threads;
+//	threads = new thread[numThreads];
+//	clock_t startTime = clock();
+//
+//	int a[] = {4, 2, 1, 9, 7, 3, 5, 8, 6};
+//	vector<int> vec(a, a + 9);
+//
+//	//int mid = (vec.size() - 1) / 2;
+//	merge_sort<int>(vec, 0, (vec.size() - 1));
+//	/*
+//	thread first(merge_sort<int>, std::ref(vec), 0, range);
+//	thread second(merge_sort<int>, std::ref(vec), range + 1, (vec.size() - 1));
+//	first.join();
+//	second.join();
+//	merge(vec, 0, range, (vec.size() - 1));
+//	
+//
+//	int lower = 0;
+//	int upper = range;
+//
+//	for (int i = 0; i < numThreads; i++) {
+//		threads[i] = thread(merge_sort<int>, std::ref(vec), lower, upper);
+//		lower = (upper + 1);
+//		upper = (upper + 1) + range;
+//	}
+//	for (int i = 0; i < numThreads; i++) {
+//		threads[i].join();
+//	}
+//	merge(vec, 0, ((vec.size() - 1) / 2), (vec.size() - 1));
+//	*/
+//
+//	for (int i = 0; i < vec.size(); i++)
+//		cout << vec[i] << endl;
+//
+//	clock_t duration = clock() - startTime;
+//
+//	cout << "Program is finished executing." << endl;
+//	double timeElapsed = (double)duration / CLOCKS_PER_SEC;
+//	cout << "Time Elapsed = " << timeElapsed << " seconds." << endl;
+//
+//	return 0;
+//}
 
 
 int main(int argc, char*argv[])
 {
-	driver(2);
+	//driver(2);
 	//test_merge_int_serial();
 	//cout << get_date_value(10, 4, 1964);
-	test_merge_string_serial();
-	int numberOfThreads = stoi(argv[1]), numsToSort;
+	csv_data *csv_d;
+	csv_d = readCSV("alumni.csv");
+	clock_t startTime = clock();
+	serialMergeSortString(csv_d, 0, CSV_SIZE - 1, CSV_SIZE);
+	clock_t duration = clock() - startTime;
+	for (int i = 0; i < CSV_SIZE; i++)
+	{
+		cout << csv_d[i].name << endl;
+	}
+	cout << duration;
+
+	//test_merge_string_serial();
+	/*int numberOfThreads = stoi(argv[1]), numsToSort;
 	bool readCSV = false, nameFirst = false;
 	string CSVInput, output, sortedOutput;
+	
 	if (argv[2] == "a") {
 		readCSV = true;
 		if (argv[3] == "n") {
@@ -477,8 +506,12 @@ int main(int argc, char*argv[])
 		output = argv[5];
 	}
 	else {
-		numsToSort = stoi(argv[3]);
-		output = argv[4];
-		sortedOutput = argv[5];
-	}
+		vector<randomInts> randomNumVector;
+		randomNumVector = create_random_nums(stoi(argv[3]));
+		merge_sort<randomInts>(randomNumVector, 0, stoi(argv[3]));
+		for (int i = 0; i < stoi(argv[3]); i++)
+		{
+			cout << randomNumVector[i].randomNum;
+		}		
+	}*/
 }
