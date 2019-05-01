@@ -17,6 +17,7 @@ const int CSV_SIZE = 25038;
 
 
 //TO DO: use this instead of namesArray and dateArray
+
 class csv_data
 {
 public:
@@ -27,8 +28,20 @@ public:
 	int month;
 	int day;
 	int date_value;
-	string institution;	
+	string institution;
+
+
+	template<typename T>
+	T first(char flag) {
+		return (flag == 'n' ? name : date_value);
+	}
+	template<typename T>
+	T second(char flag) {
+		return (flag == 'n' ? date_value : name);
+	}
 };
+
+
 
 void convertGradDate(csv_data*);
 
@@ -60,11 +73,9 @@ void serialMergeString(csv_data csv_data_array[], int low, int mid, int high, in
 	int i = low, j = mid + 1, k = low;
 	csv_data *Temp_array;
 	Temp_array = new csv_data[size];
-	bool nameFirst = true;
 
 	while (i <= mid && j <= high)
 	{
-		
 		if (csv_data_array[i].name < csv_data_array[j].name)
 		{
 			Temp_array[k] = csv_data_array[i];
@@ -110,8 +121,6 @@ void serialMergeString(csv_data csv_data_array[], int low, int mid, int high, in
 	}
 }
 
-int threadCount = 0;
-int threadSize = 4;
 //function 1 of 2 for serial merge sort using strings
 void serialMergeSortString(csv_data csv_data_array[], int low, int high, int size)
 {
@@ -119,31 +128,9 @@ void serialMergeSortString(csv_data csv_data_array[], int low, int high, int siz
 
 	if (low < high)
 	{
-		
 		mid = ((low + high) / 2);
-		if (threadCount < threadSize -1)
-		{
-			threadCount++;
-			thread t1(serialMergeSortString, csv_data_array, low, mid, size);
-			threadCount++;
-			thread t2(serialMergeSortString, csv_data_array, mid + 1, high, size);
-			
-			t1.join();
-			t2.join();
-			//serialMergeString(csv_data_array, low, mid, high, size);			
-		}
-		
-		else if (threadCount < threadSize)
-		{
-			threadCount++;
-			thread t1(serialMergeSortString, csv_data_array, low, mid, size);
-			serialMergeSortString(csv_data_array, mid + 1, high, size);			
-			t1.join();			
-		}
-		else
-			serialMergeSortString(csv_data_array, low, mid, size);
-			serialMergeSortString(csv_data_array, mid + 1, high, size);				
-		
+		serialMergeSortString(csv_data_array, low, mid, size);
+		serialMergeSortString(csv_data_array, mid + 1, high, size);		//might enter threads here
 		serialMergeString(csv_data_array, low, mid, high, size);
 	}
 }
@@ -202,17 +189,14 @@ void test_merge_int_serial()
 void test_merge_string_serial()
 {
 	//code to test merge sort with strings
-	int size = 4;
-	csv_data data[4];
+	int size = 3;
+	csv_data data[3];
 	data[0].name = "connor";
 	data[1].name = "ann";
 	data[2].name = "connor";
-	data[3].name = "bob";
 	data[0].date_value = 1239;
 	data[1].date_value = 402;
 	data[2].date_value = 200;
-	data[3].date_value = 77;
-	
 
 	serialMergeSortString(data, 0, size - 1, size);
 	//print out results
@@ -369,6 +353,8 @@ void convertGradDate(csv_data* data) {
 
 	}
 }
+int threadCount = 0;
+int threadSize = 3;
 
 template <typename T>
 void merge(vector<T>& vec, int start, int mid, int end)
@@ -402,30 +388,63 @@ void merge_sort(vector<T>& vec, int start, int end)
 
 	int mid = start + (end - start) / 2;
 
-	// single-thread merge-sort
-	merge_sort(vec, start, mid);
-	merge_sort(vec, mid + 1, end);
-
+	if (threadCount < threadSize - 1) {
+		threadCount++;
+		thread first(merge_sort<int>, std::ref(vec), 0, mid);
+		threadCount++;
+		thread second(merge_sort<int>, std::ref(vec), mid + 1, (vec.size() - 1));
+		first.join();
+		second.join();
+		merge(vec, 0, mid, (vec.size() - 1));
+	}
+	else if (threadCount < threadSize) {
+		threadCount++;
+		thread first(merge_sort<int>, std::ref(vec), 0, mid);
+		merge_sort<int>(vec, mid + 1, (vec.size() - 1));
+		first.join();
+		merge(vec, 0, mid, (vec.size() - 1));
+	}
+	else {
+		// single-thread merge-sort
+		merge_sort(vec, start, mid);
+		merge_sort(vec, mid + 1, end);
+	}
 
 	merge(vec, start, mid, end);
 }
 
-
 int driver(int numThreads)
 {
+	thread * threads;
+	threads = new thread[numThreads];
 	clock_t startTime = clock();
 
-	int a[] = {4, 2, 5, 9, 7, 1, 3, 8, 6};
+	int a[] = {4, 2, 1, 9, 7, 3, 5, 8, 6};
 	vector<int> vec(a, a + 9);
 
-	int mid = (vec.size() - 1) / 2;
-
-	thread first(merge_sort<int>, std::ref(vec), 0, mid);
-	thread second(merge_sort<int>, std::ref(vec), mid + 1, (vec.size() - 1));
+	//int mid = (vec.size() - 1) / 2;
+	merge_sort<int>(vec, 0, (vec.size() - 1));
+	/*
+	thread first(merge_sort<int>, std::ref(vec), 0, range);
+	thread second(merge_sort<int>, std::ref(vec), range + 1, (vec.size() - 1));
 	first.join();
 	second.join();
-	merge(vec, 0, mid, (vec.size() - 1));
+	merge(vec, 0, range, (vec.size() - 1));
+	
 
+	int lower = 0;
+	int upper = range;
+
+	for (int i = 0; i < numThreads; i++) {
+		threads[i] = thread(merge_sort<int>, std::ref(vec), lower, upper);
+		lower = (upper + 1);
+		upper = (upper + 1) + range;
+	}
+	for (int i = 0; i < numThreads; i++) {
+		threads[i].join();
+	}
+	merge(vec, 0, ((vec.size() - 1) / 2), (vec.size() - 1));
+	*/
 
 	for (int i = 0; i < vec.size(); i++)
 		cout << vec[i] << endl;
@@ -440,10 +459,26 @@ int driver(int numThreads)
 }
 
 
-int main()
+int main(int argc, char*argv[])
 {
-	//driver(2);
+	driver(2);
 	//test_merge_int_serial();
 	//cout << get_date_value(10, 4, 1964);
 	test_merge_string_serial();
+	int numberOfThreads = stoi(argv[1]), numsToSort;
+	bool readCSV = false, nameFirst = false;
+	string CSVInput, output, sortedOutput;
+	if (argv[2] == "a") {
+		readCSV = true;
+		if (argv[3] == "n") {
+			nameFirst = true;
+		}
+		CSVInput = argv[4];
+		output = argv[5];
+	}
+	else {
+		numsToSort = stoi(argv[3]);
+		output = argv[4];
+		sortedOutput = argv[5];
+	}
 }
