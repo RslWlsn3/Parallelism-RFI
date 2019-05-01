@@ -60,9 +60,11 @@ void serialMergeString(csv_data csv_data_array[], int low, int mid, int high, in
 	int i = low, j = mid + 1, k = low;
 	csv_data *Temp_array;
 	Temp_array = new csv_data[size];
+	bool nameFirst = true;
 
 	while (i <= mid && j <= high)
 	{
+		
 		if (csv_data_array[i].name < csv_data_array[j].name)
 		{
 			Temp_array[k] = csv_data_array[i];
@@ -108,6 +110,8 @@ void serialMergeString(csv_data csv_data_array[], int low, int mid, int high, in
 	}
 }
 
+int threadCount = 0;
+int threadSize = 4;
 //function 1 of 2 for serial merge sort using strings
 void serialMergeSortString(csv_data csv_data_array[], int low, int high, int size)
 {
@@ -115,9 +119,31 @@ void serialMergeSortString(csv_data csv_data_array[], int low, int high, int siz
 
 	if (low < high)
 	{
+		
 		mid = ((low + high) / 2);
-		serialMergeSortString(csv_data_array, low, mid, size);
-		serialMergeSortString(csv_data_array, mid + 1, high, size);		//might enter threads here
+		if (threadCount < threadSize -1)
+		{
+			threadCount++;
+			thread t1(serialMergeSortString, csv_data_array, low, mid, size);
+			threadCount++;
+			thread t2(serialMergeSortString, csv_data_array, mid + 1, high, size);
+			
+			t1.join();
+			t2.join();
+			//serialMergeString(csv_data_array, low, mid, high, size);			
+		}
+		
+		else if (threadCount < threadSize)
+		{
+			threadCount++;
+			thread t1(serialMergeSortString, csv_data_array, low, mid, size);
+			serialMergeSortString(csv_data_array, mid + 1, high, size);			
+			t1.join();			
+		}
+		else
+			serialMergeSortString(csv_data_array, low, mid, size);
+			serialMergeSortString(csv_data_array, mid + 1, high, size);				
+		
 		serialMergeString(csv_data_array, low, mid, high, size);
 	}
 }
@@ -176,14 +202,17 @@ void test_merge_int_serial()
 void test_merge_string_serial()
 {
 	//code to test merge sort with strings
-	int size = 3;
-	csv_data data[3];
+	int size = 4;
+	csv_data data[4];
 	data[0].name = "connor";
 	data[1].name = "ann";
 	data[2].name = "connor";
+	data[3].name = "bob";
 	data[0].date_value = 1239;
 	data[1].date_value = 402;
 	data[2].date_value = 200;
+	data[3].date_value = 77;
+	
 
 	serialMergeSortString(data, 0, size - 1, size);
 	//print out results
@@ -413,7 +442,7 @@ int driver(int numThreads)
 
 int main()
 {
-	driver(2);
+	//driver(2);
 	//test_merge_int_serial();
 	//cout << get_date_value(10, 4, 1964);
 	test_merge_string_serial();
