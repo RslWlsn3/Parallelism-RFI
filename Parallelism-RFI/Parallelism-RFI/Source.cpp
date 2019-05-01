@@ -354,7 +354,7 @@ void convertGradDate(csv_data* data) {
 	}
 }
 int threadCount = 0;
-int threadSize = 3;
+int threadSize;
 
 template <typename T>
 void merge(vector<T>& vec, int start, int mid, int end)
@@ -388,97 +388,49 @@ void merge_sort(vector<T>& vec, int start, int end)
 
 	int mid = start + (end - start) / 2;
 
-	if (threadCount < threadSize - 1) {
-		threadCount++;
-		thread first(merge_sort<int>, std::ref(vec), 0, mid);
-		threadCount++;
-		thread second(merge_sort<int>, std::ref(vec), mid + 1, (vec.size() - 1));
-		first.join();
-		second.join();
-		merge(vec, 0, mid, (vec.size() - 1));
-	}
-	else if (threadCount < threadSize) {
-		threadCount++;
-		thread first(merge_sort<int>, std::ref(vec), 0, mid);
-		merge_sort<int>(vec, mid + 1, (vec.size() - 1));
-		first.join();
-		merge(vec, 0, mid, (vec.size() - 1));
-	}
-	else {
-		// single-thread merge-sort
-		merge_sort(vec, start, mid);
-		merge_sort(vec, mid + 1, end);
-	}
+	merge_sort(vec, start, mid);
+	merge_sort(vec, (mid + 1), end);
 
 	merge(vec, start, mid, end);
 }
 
-int driver(int numThreads)
+void driver()
 {
-	thread * threads;
-	threads = new thread[numThreads];
+
+	vector<int> vec;
+	for (long long int i = 0; i < 99999999; i++) {
+		int x = rand() % INT_MAX;
+		vec.push_back(x);
+	}
+
 	clock_t startTime = clock();
 
-	int a[] = {4, 2, 1, 9, 7, 3, 5, 8, 6};
-	vector<int> vec(a, a + 9);
+	//int a[] = {4, 2, 1, 9, 7, 3, 5, 8, 6};
+	//vector<int> vec(a, a + 9);
 
-	//int mid = (vec.size() - 1) / 2;
-	merge_sort<int>(vec, 0, (vec.size() - 1));
-	/*
-	thread first(merge_sort<int>, std::ref(vec), 0, range);
-	thread second(merge_sort<int>, std::ref(vec), range + 1, (vec.size() - 1));
+	thread first(merge_sort<int>, std::ref(vec), 0, 50000000);
+	thread second(merge_sort<int>, std::ref(vec), 50000001, 99999999);
+
 	first.join();
 	second.join();
-	merge(vec, 0, range, (vec.size() - 1));
-	
-
-	int lower = 0;
-	int upper = range;
-
-	for (int i = 0; i < numThreads; i++) {
-		threads[i] = thread(merge_sort<int>, std::ref(vec), lower, upper);
-		lower = (upper + 1);
-		upper = (upper + 1) + range;
-	}
-	for (int i = 0; i < numThreads; i++) {
-		threads[i].join();
-	}
-	merge(vec, 0, ((vec.size() - 1) / 2), (vec.size() - 1));
-	*/
-
-	for (int i = 0; i < vec.size(); i++)
-		cout << vec[i] << endl;
+	merge(vec, 0, 50000000, 99999999);
 
 	clock_t duration = clock() - startTime;
+	
+	for (int i = 0; i < vec.size(); i++)
+		cout << vec[i] << endl;
 
 	cout << "Program is finished executing." << endl;
 	double timeElapsed = (double)duration / CLOCKS_PER_SEC;
 	cout << "Time Elapsed = " << timeElapsed << " seconds." << endl;
 
-	return 0;
 }
 
 
 int main(int argc, char*argv[])
 {
-	driver(2);
+	driver();
 	//test_merge_int_serial();
 	//cout << get_date_value(10, 4, 1964);
-	test_merge_string_serial();
-	int numberOfThreads = stoi(argv[1]), numsToSort;
-	bool readCSV = false, nameFirst = false;
-	string CSVInput, output, sortedOutput;
-	if (argv[2] == "a") {
-		readCSV = true;
-		if (argv[3] == "n") {
-			nameFirst = true;
-		}
-		CSVInput = argv[4];
-		output = argv[5];
-	}
-	else {
-		numsToSort = stoi(argv[3]);
-		output = argv[4];
-		sortedOutput = argv[5];
-	}
+
 }
