@@ -353,6 +353,8 @@ void convertGradDate(csv_data* data) {
 
 	}
 }
+int threadCount = 0;
+int threadSize = 3;
 
 template <typename T>
 void merge(vector<T>& vec, int start, int mid, int end)
@@ -386,14 +388,30 @@ void merge_sort(vector<T>& vec, int start, int end)
 
 	int mid = start + (end - start) / 2;
 
-	// single-thread merge-sort
-	merge_sort(vec, start, mid);
-	merge_sort(vec, mid + 1, end);
-
+	if (threadCount < threadSize - 1) {
+		threadCount++;
+		thread first(merge_sort<int>, std::ref(vec), 0, mid);
+		threadCount++;
+		thread second(merge_sort<int>, std::ref(vec), mid + 1, (vec.size() - 1));
+		first.join();
+		second.join();
+		merge(vec, 0, mid, (vec.size() - 1));
+	}
+	else if (threadCount < threadSize) {
+		threadCount++;
+		thread first(merge_sort<int>, std::ref(vec), 0, mid);
+		merge_sort<int>(vec, mid + 1, (vec.size() - 1));
+		first.join();
+		merge(vec, 0, mid, (vec.size() - 1));
+	}
+	else {
+		// single-thread merge-sort
+		merge_sort(vec, start, mid);
+		merge_sort(vec, mid + 1, end);
+	}
 
 	merge(vec, start, mid, end);
 }
-
 
 int driver(int numThreads)
 {
@@ -401,26 +419,32 @@ int driver(int numThreads)
 	threads = new thread[numThreads];
 	clock_t startTime = clock();
 
-	int a[] = {4, 2, 5, 9, 7, 1, 3, 8, 6};
+	int a[] = {4, 2, 1, 9, 7, 3, 5, 8, 6};
 	vector<int> vec(a, a + 9);
 
-	int range = (vec.size() - 1) / numThreads;
-
+	//int mid = (vec.size() - 1) / 2;
+	merge_sort<int>(vec, 0, (vec.size() - 1));
+	/*
 	thread first(merge_sort<int>, std::ref(vec), 0, range);
 	thread second(merge_sort<int>, std::ref(vec), range + 1, (vec.size() - 1));
 	first.join();
 	second.join();
 	merge(vec, 0, range, (vec.size() - 1));
+	
+
+	int lower = 0;
+	int upper = range;
 
 	for (int i = 0; i < numThreads; i++) {
-
-		threads[i] = thread(merge_sort<int>, std::ref(vec), (i * range), ((i * range) + range));
+		threads[i] = thread(merge_sort<int>, std::ref(vec), lower, upper);
+		lower = (upper + 1);
+		upper = (upper + 1) + range;
 	}
 	for (int i = 0; i < numThreads; i++) {
 		threads[i].join();
 	}
 	merge(vec, 0, ((vec.size() - 1) / 2), (vec.size() - 1));
-
+	*/
 
 	for (int i = 0; i < vec.size(); i++)
 		cout << vec[i] << endl;
@@ -437,7 +461,7 @@ int driver(int numThreads)
 
 int main(int argc, char*argv[])
 {
-	driver(3);
+	driver(2);
 	//test_merge_int_serial();
 	//cout << get_date_value(10, 4, 1964);
 	test_merge_string_serial();
