@@ -403,11 +403,11 @@ void merge_sort(vector<T>& vec, int start, int end)
 	merge(vec, start, mid, end);
 }
 
-void intMergeSortStart(int numInts, int numThreads = 1)
+void intMergeSortStart(int numInts, int numThreads, string outputFile_unsorted, string outputFile_sorted)
 {
 
 	vector<int> vec;
-	ofstream outputFile("unsorted_random_nums.txt");
+	ofstream outputFile(outputFile_unsorted);
 	for (long long int i = 0; i < numInts; i++) {
 		int x = rand() % INT_MAX;
 		vec.push_back(x);
@@ -454,7 +454,7 @@ void intMergeSortStart(int numInts, int numThreads = 1)
 
 	clock_t duration = clock() - startTime;
 
-	ofstream outputFile2("sorted_random_nums.txt");
+	ofstream outputFile2(outputFile_sorted);
 	for (long long int i = 0; i < numInts; i++) {
 
 		outputFile2 << vec[i] << endl;
@@ -471,12 +471,11 @@ void intMergeSortStart(int numInts, int numThreads = 1)
 
 
 int main(int argc, char*argv[])
-{
-	intMergeSortStart(1000, 1);
+{	
 	int numberOfThreads = stoi(argv[1]);
 	string outputFileUnsorted, outputFile;
 	if (*argv[2] == 'i') {
-		intMergeSortStart(stoi(argv[3]), stoi(argv[1]));
+		intMergeSortStart(stoi(argv[3]), stoi(argv[1]), argv[4], argv[5]);
 		outputFileUnsorted = argv[4];
 		outputFile = argv[5];
 	}
