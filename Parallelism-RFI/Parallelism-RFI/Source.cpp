@@ -411,11 +411,11 @@ void merge_sort(vector<T>& vec, int start, int end)
 	merge(vec, start, mid, end);
 }
 
-void intMergeSortStart(int numThreads = 1)
+void intMergeSortStart(int numInts, int numThreads = 1)
 {
 
 	vector<int> vec;
-	for (long long int i = 0; i < 100000000; i++) {
+	for (long long int i = 0; i < numInts; i++) {
 		int x = rand() % INT_MAX;
 		vec.push_back(x);
 	}
@@ -472,7 +472,18 @@ void intMergeSortStart(int numThreads = 1)
 
 int main(int argc, char*argv[])
 {
-	intMergeSortStart(stoi(argv[1]));
+	if (*argv[2] == 'i') {
+		intMergeSortStart(stoi(argv[3]), stoi(argv[1]));
+	}
+	else if (*argv[2] == 'a') {
+
+	}
+	else {
+		cout << "The expected parameters are:\n";
+		cout << "For integer sort:   Number_of_Threads i Number_of_Ints\n";
+		cout << "For csv sort:   Number_of_Threads a (n or d to sort by name or date) Input_Path Output_Path\n";
+	}
+
 	//test_merge_int_serial();
 	//cout << get_date_value(10, 4, 1964);
 	csv_data *csv_d;
