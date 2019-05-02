@@ -30,7 +30,6 @@ public:
 	int date_value;
 	string institution;
 
-
 	template<typename T>
 	T first(char flag) {
 		return (flag == 'n' ? name : date_value);
@@ -68,6 +67,7 @@ vector<randomInts> create_random_nums(int size)
 {
 	srand(time(NULL));
 	vector<randomInts> randomNumVector;
+	ofstream outputFile("unsorted_random_nums.txt");
 
 	for (int i = 0; i < size; i++)
 	{
@@ -75,6 +75,7 @@ vector<randomInts> create_random_nums(int size)
 		randomInts ri;
 		ri.randomNum = x;
 		randomNumVector.push_back(ri);
+		outputFile << x<<endl;
 	}
 	return randomNumVector;
 }
@@ -419,9 +420,11 @@ void intMergeSortStart(int numInts, int numThreads = 1)
 {
 
 	vector<int> vec;
+	ofstream outputFile("unsorted_random_nums.txt");
 	for (long long int i = 0; i < numInts; i++) {
 		int x = rand() % INT_MAX;
 		vec.push_back(x);
+		outputFile << x << endl;
 	}
 
 	clock_t startTime = clock();
@@ -464,6 +467,12 @@ void intMergeSortStart(int numInts, int numThreads = 1)
 
 	clock_t duration = clock() - startTime;
 
+	ofstream outputFile2("sorted_random_nums.txt");
+	for (long long int i = 0; i < numInts; i++) {
+		
+		outputFile2 << vec[i] << endl;
+	}
+
 	//for (int i = 0; i < vec.size(); i++)
 	//	cout << vec[i] << endl;
 
@@ -475,7 +484,7 @@ void intMergeSortStart(int numInts, int numThreads = 1)
 
 
 int main(int argc, char*argv[])
-{
+{		
 	if (*argv[2] == 'i') {
 		intMergeSortStart(stoi(argv[3]), stoi(argv[1]));
 	}
