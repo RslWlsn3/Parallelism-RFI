@@ -1,4 +1,5 @@
 //RFI
+// Created by Tanner, Connor, and Blake
 #define _CRT_SECURE_NO_WARNINGS
 #include <iostream>
 #include <thread>
@@ -13,10 +14,6 @@
 using namespace std;
 
 const int CSV_SIZE = 25038;
-
-
-
-//TO DO: use this instead of namesArray and dateArray
 
 class csv_data
 {
@@ -35,184 +32,6 @@ void TannerMergeSort(csv_data *data, int low, int high, char flag);
 void TannerMerge(csv_data *data, int low, int high, int mid, char flag);
 void saveCSV(csv_data*data, string outputFile);
 void convertGradDate(csv_data*);
-
-class randomInts
-{
-public:
-	int randomNum;
-
-	template<typename T>
-	T first(char flag = NULL) {
-		return randomNum;
-	}
-	template<typename T>
-	T second(char flag = NULL) {
-		return randomNum;
-	}
-};
-
-//creates size amount of random integers in the range of 1 to max size of an int
-vector<randomInts> create_random_nums(int size)
-{
-	srand(time(NULL));
-	vector<randomInts> randomNumVector;
-
-	for (int i = 0; i < size; i++)
-	{
-		int x = rand() % INT_MAX;
-		randomInts ri;
-		ri.randomNum = x;
-		randomNumVector.push_back(ri);
-	}
-	return randomNumVector;
-}
-
-void PrintArray(int *array, int n) {
-	for (int i = 0; i < n; ++i)
-		cout << array[i] << " " << flush<<endl;
-	cout << endl;
-}
-
-//TO DO: sort by grad's date if they have the same name, dateArray has #days from current day(not currently being used)
-//Function 2 of 2 for serial merge sort using strings
-void serialMergeString(csv_data csv_data_array[], int low, int mid, int high, int size)
-{
-	int i = low, j = mid + 1, k = low;
-	csv_data *Temp_array;
-	Temp_array = new csv_data[size];
-
-	while (i <= mid && j <= high)
-	{
-		if (csv_data_array[i].name < csv_data_array[j].name)
-		{
-			Temp_array[k] = csv_data_array[i];
-			i++;
-		}
-		else if (csv_data_array[i].name == csv_data_array[j].name)	//names are the same, use date array
-		{
-			if (csv_data_array[i].date_value < csv_data_array[j].date_value)
-			{
-				Temp_array[k] = csv_data_array[i];
-				i++;
-			}
-			else
-			{
-				Temp_array[k] = csv_data_array[j];
-				j++;
-			}
-		}
-		else
-		{
-			Temp_array[k] = csv_data_array[j];
-			j++;
-		}
-		k++;
-	}
-	if (i > mid)
-	{
-		for (int h = j; h <= high; h++)
-		{
-			Temp_array[k] = csv_data_array[h];
-			k++;
-		}
-	}
-	else
-		for (int h = i; h <= mid; h++)
-		{
-			Temp_array[k] = csv_data_array[h];
-			k++;
-		}
-	for (int i = low; i <= high; i++)
-	{
-		csv_data_array[i] = Temp_array[i];
-	}
-}
-
-//function 1 of 2 for serial merge sort using strings
-void serialMergeSortString(csv_data csv_data_array[], int low, int high, int size)
-{
-	int mid = 0;
-
-	if (low < high)
-	{
-		mid = ((low + high) / 2);
-		serialMergeSortString(csv_data_array, low, mid, size);
-		serialMergeSortString(csv_data_array, mid + 1, high, size);		//might enter threads here
-		serialMergeString(csv_data_array, low, mid, high, size);
-	}
-}
-
-
-//function 1 of 2 for serial merge sort using ints
-void serialMergeint(int numArray[], int low, int  mid, int high) {
-	int *temp = new int[high - low + 1];//temporary merger array
-	int i = low, j = mid + 1;//i is for left-hand,j is for right-hand
-	int k = 0;//k is for the temporary array
-	while (i <= mid && j <= high) {
-		if (numArray[i] <= numArray[j])
-			temp[k++] = numArray[i++];
-		else
-			temp[k++] = numArray[j++];
-	}
-	//rest elements of left-half
-	while (i <= mid)
-		temp[k++] = numArray[i++];
-	//rest elements of right-half
-	while (j <= high)
-		temp[k++] = numArray[j++];
-	//copy the mergered temporary array to the original array
-	for (k = 0, i = low; i <= high; ++i, ++k)
-		numArray[i] = temp[k];
-
-	delete[]temp;
-}
-
-//function 2 of 2 for serial merge sort using ints
-void serialMergeSortint(int numArray[], int low, int high, int size)
-{
-	int mid = 0;
-	if (low < high)
-	{
-		mid = ((low + high) / 2);
-		serialMergeSortint(numArray, low, mid, size);
-		serialMergeSortint(numArray, mid + 1, high, size);
-		serialMergeint(numArray, low, mid, high);
-	}
-}
-
-////creates 1 billion (currently only hundred million) random ints and then calls serialMergeSortint to sort them serialy or
-//void test_merge_int_serial()
-//{
-//	//code to test merge sort with ints
-//	int size = 100000000;	//crashes when I add another 0
-//	int* arr = create_random_nums(size);
-//
-//	serialMergeSortint(arr, 0, size - 1, size);
-//
-//	//print out results
-//	for (int i = 0; i < size; i++)
-//		cout << arr[i] << endl;
-//}
-
-void test_merge_string_serial()
-{
-	//code to test merge sort with strings
-	int size = 3;
-	csv_data data[3];
-	data[0].name = "connor";
-	data[1].name = "ann";
-	data[2].name = "connor";
-	data[0].date_value = 1239;
-	data[1].date_value = 402;
-	data[2].date_value = 200;
-
-	serialMergeSortString(data, 0, size - 1, size);
-	//print out results
-	for (int i = 0; i < size; i++)
-	{
-		cout << data[i].name << data[i].date_value << endl;
-	}
-}
 
 int days_in_month(int year, int month)
 {
@@ -251,6 +70,7 @@ int get_date_value(int month, int day, int year)
 	return date_value;
 
 }
+
 csv_data* readCSV(string fileName) {
 	ifstream file;
 	string temp;
@@ -362,8 +182,6 @@ void convertGradDate(csv_data* data) {
 
 	}
 }
-int threadCount = 0;
-int threadSize;
 
 template <typename T>
 void merge(vector<T>& vec, int start, int mid, int end)
@@ -521,9 +339,9 @@ void csvMergeSortStart(csv_data *data, char flag, int numThreads = 1)
 
 int main(int argc, char*argv[])
 {
-	intMergeSortStart(1000, 1);
 	int numberOfThreads = stoi(argv[1]);
 	string outputFileUnsorted, outputFile;
+
 	if (*argv[2] == 'i') {
 		intMergeSortStart(stoi(argv[3]), stoi(argv[1]));
 		outputFileUnsorted = argv[4];
@@ -536,44 +354,13 @@ int main(int argc, char*argv[])
 		csv_data *csv_d;
 		csv_d = readCSV(inputFile);
 		csvMergeSortStart(csv_d, flag, stoi(argv[1]));
+		saveCSV(csv_d, outputFile);
 	}
 	else {
 		cout << "The expected parameters are:\n";
-		cout << "For integer sort:   Number_of_Threads i Number_of_Ints\n";
+		cout << "For integer sort:   Number_of_Threads i Number_of_Ints Output_Path_unsorted Output_Path_sorted\n";
 		cout << "For csv sort:   Number_of_Threads a (n or d to sort by name or date) Input_Path Output_Path\n";
 	}
-
-	//test_merge_int_serial();
-	//cout << get_date_value(10, 4, 1964);
-
-
-	//clock_t startTime = clock();
-	//serialMergeSortString(csv_d, 0, CSV_SIZE - 1, CSV_SIZE);
-	//clock_t duration = clock() - startTime;
-	//cout << duration;
-
-	//test_merge_string_serial();
-	/*int numberOfThreads = stoi(argv[1]), numsToSort;
-	bool readCSV = false, nameFirst = false;
-	string CSVInput, output, sortedOutput;
-
-	if (argv[2] == "a") {
-		readCSV = true;
-		if (argv[3] == "n") {
-			nameFirst = true;
-		}
-		CSVInput = argv[4];
-		output = argv[5];
-	}
-	else {
-		vector<randomInts> randomNumVector;
-		randomNumVector = create_random_nums(stoi(argv[3]));
-		merge_sort<randomInts>(randomNumVector, 0, stoi(argv[3]));
-		for (int i = 0; i < stoi(argv[3]); i++)
-		{
-			cout << randomNumVector[i].randomNum;
-		}
-	}*/
 }
 
 void TannerMerge(csv_data *data, int low, int high, int mid, char flag)
@@ -706,5 +493,4 @@ void saveCSV(csv_data*data, string outputFile) {
 	}
 	ofile.close();
 	return;
-
 }
