@@ -41,9 +41,12 @@ public:
 	}
 };
 
+void TannerMergeSort(csv_data *data, int low, int high, char flag);
+void TannerMerge(csv_data *data, int low, int high, int mid, char flag);
 
 
-void convertGradDate(vector<csv_data>);
+
+void convertGradDate(csv_data*);
 
 class randomInts
 {
@@ -76,6 +79,11 @@ vector<randomInts> create_random_nums(int size)
 	return randomNumVector;
 }
 
+void PrintArray(int *array, int n) {
+	for (int i = 0; i < n; ++i)
+		cout << array[i] << " " << flush<<endl;
+	cout << endl;
+}
 
 //TO DO: sort by grad's date if they have the same name, dateArray has #days from current day(not currently being used)
 //Function 2 of 2 for serial merge sort using strings
@@ -253,15 +261,15 @@ int get_date_value(int month, int day, int year)
 	date_value += (current_month - month) * days_in_month(year, month);
 	date_value += (current_day - day);
 	return date_value;
+
 }
-vector<csv_data> readCSV(string fileName) {
+csv_data* readCSV(string fileName) {
 	ifstream file;
 	string temp;
 	file.open(fileName);
 	int i = -1;
 
-	//csv_data* alumni = new csv_data[CSV_SIZE];
-	vector<csv_data> alumni;
+	csv_data* alumni = new csv_data[CSV_SIZE];
 
 	if (file.is_open()) {
 		//read from the file
@@ -279,6 +287,7 @@ vector<csv_data> readCSV(string fileName) {
 
 			//get value
 			getline(file, temp, '"');
+			temp[0] = toupper(temp[0]);
 			d.name = temp;
 
 			//trash comma
@@ -308,7 +317,7 @@ vector<csv_data> readCSV(string fileName) {
 				d.institution = temp;
 			}
 
-			alumni.push_back(d);
+			alumni[i] = d;
 		}
 	}
 	else {
@@ -319,7 +328,7 @@ vector<csv_data> readCSV(string fileName) {
 
 }
 
-void convertGradDate(vector<csv_data> data) {
+void convertGradDate(csv_data* data) {
 	string value;
 
 	unordered_map<string, int> MONTHS;
@@ -405,86 +414,26 @@ void merge_sort(vector<T>& vec, int start, int end)
 
 	merge(vec, start, mid, end);
 }
-int num = 0;
-void connor_merge(vector<csv_data> vec, int start, int mid, int end, char flag)
-{
-	vector<csv_data> one(vec.begin() + start, vec.begin() + mid + 1);
-	vector<csv_data> two(vec.begin() + mid + 1, vec.begin() + end + 1);
 
-	int a = 0;
-	int b = 0;
-	int d1 = NULL;
-	int d2 = NULL;
-	string s1;
-	string s2;	
-	
-	int index = start;
-	while (a < one.size() && b < two.size())
-	{
-		if (flag == 'd')
-		{
-			d1 = one[a].date_value;
-			d2 = two[a].date_value;
-		}
-		else
-		{
-			s1 = one[a].name;
-			s2 = two[a].name;
-		}
-		if (d1 == NULL)
-		{
-			if (s1 < s2)
-				vec[index++] = one[a++];
-			else
-				vec[index++] = two[b++];
-		}
-		else
-		{
-			if (d1 < d2)
-				vec[index++] = one[a++];
-			else
-				vec[index++] = two[b++];
-		}
-	}
-
-	// merge the left-over elements
-	while (a < one.size())
-		vec[index++] = one[a++];
-	while (b < two.size())
-		vec[index++] = two[b++];
-}
-
-template <typename T>
-void connor_merge_sort(vector<T>& vec, int start, int end)
-{
-	if (start >= end)
-		return;
-
-	int mid = start + (end - start) / 2;
-
-	connor_merge_sort(vec, start, mid);
-	connor_merge_sort(vec, (mid + 1), end);
-
-	connor_merge(vec, start, mid, end, 'd');
-}
-
-void driver()
+void intMergeSortStart(int numInts, int numThreads = 1)
 {
 
 	vector<int> vec;
-	for (long long int i = 0; i < 100000000; i++) {
+	for (long long int i = 0; i < numInts; i++) {
 		int x = rand() % INT_MAX;
 		vec.push_back(x);
 	}
 
 	clock_t startTime = clock();
 
-	int numThreads = 4;
-	long long int range = vec.size() / numThreads;
 	thread * threads;
 	threads = new thread[numThreads];
+
+	long long int range = vec.size() / numThreads;
 	long long int low = 0;
 	long long int high = range;
+
+	// Create the threads and start merge sorting
 	for (int i = 0; i < numThreads; i++) {
 		if (i + 1 == numThreads) {
 			high = (vec.size() - 1);
@@ -498,6 +447,7 @@ void driver()
 		threads[i].join();
 	}
 
+	// Run merge on all the sections that were sorted by the threads
 	high = range + range;
 	long long int mid = range;
 	for (int i = 0; i < (numThreads - 1); i++) {
@@ -511,29 +461,6 @@ void driver()
 
 	delete[] threads;
 	threads = nullptr;
-
-	//merge(vec, 0, range, (vec.size() - 1));
-	/*
-	thread first(merge_sort<int>, std::ref(vec), 0, 12500000);
-	thread second(merge_sort<int>, std::ref(vec), 12500001, 25000000);
-	thread third(merge_sort<int>, std::ref(vec), 25000001, 37500000);
-	thread forth(merge_sort<int>, std::ref(vec), 37500001, 50000000);
-	thread fifth(merge_sort<int>, std::ref(vec), 50000001, 62500000);
-	thread six(merge_sort<int>, std::ref(vec), 62500001, 75000000);
-	thread seven(merge_sort<int>, std::ref(vec), 75000001, 87500000);
-	thread eight(merge_sort<int>, std::ref(vec), 87500001, 99999999);
-
-	first.join();
-	second.join();
-	third.join();
-	forth.join();
-	fifth.join();
-	six.join();
-	seven.join();
-	eight.join();
-
-	merge(vec, 0, 50000000, 99999999);
-	*/
 
 	clock_t duration = clock() - startTime;
 
@@ -549,20 +476,31 @@ void driver()
 
 int main(int argc, char*argv[])
 {
-	//driver(2);
+	if (*argv[2] == 'i') {
+		intMergeSortStart(stoi(argv[3]), stoi(argv[1]));
+	}
+	else if (*argv[2] == 'a') {
+
+	}
+	else {
+		cout << "The expected parameters are:\n";
+		cout << "For integer sort:   Number_of_Threads i Number_of_Ints\n";
+		cout << "For csv sort:   Number_of_Threads a (n or d to sort by name or date) Input_Path Output_Path\n";
+	}
+
 	//test_merge_int_serial();
 	//cout << get_date_value(10, 4, 1964);
-	vector<csv_data> csv_d;
+	csv_data *csv_d;
 	csv_d = readCSV("alumni.csv");
-	clock_t startTime = clock();
+	TannerMergeSort(csv_d, 0, CSV_SIZE, 'n');
+	//clock_t startTime = clock();
 	//serialMergeSortString(csv_d, 0, CSV_SIZE - 1, CSV_SIZE);
-	connor_merge_sort(csv_d, 0, 0);
-	clock_t duration = clock() - startTime;
+	//clock_t duration = clock() - startTime;
 	for (int i = 0; i < CSV_SIZE; i++)
 	{
 		cout << csv_d[i].name << endl;
 	}
-	cout << duration;
+	//cout << duration;
 
 	//test_merge_string_serial();
 	/*int numberOfThreads = stoi(argv[1]), numsToSort;
@@ -586,4 +524,109 @@ int main(int argc, char*argv[])
 			cout << randomNumVector[i].randomNum;
 		}
 	}*/
+}
+
+void TannerMerge(csv_data *data, int low, int high, int mid, char flag)
+{
+
+	// We have low to mid and mid+1 to high already sorted.
+	int i, j, k;
+	csv_data *temp = new csv_data[high - low + 1];
+	i = low;
+	k = 0;
+	j = mid + 1;
+	// Merge the two parts into temp[].
+	while (i <= mid && j <= high)
+	{
+		if (flag == 'n') {
+			if (data[i].name < data[j].name)
+			{
+				temp[k] = data[i];
+				k++;
+				i++;
+			}
+			else if (data[i].name == data[j].name) {
+				if (data[i].date_value < data[j].date_value) {
+					temp[k] = data[i];
+					k++;
+					i++;
+				}
+				else {
+					temp[k] = data[j];
+					k++;
+					j++;
+				}
+			}
+			else
+			{
+				temp[k] = data[j];
+				k++;
+				j++;
+			}
+		}
+		else if (flag == 'd') {
+			if (data[i].date_value < data[j].date_value)
+			{
+				temp[k] = data[i];
+				k++;
+				i++;
+			}
+			else if (data[i].date_value == data[j].date_value) {
+				if (data[i].name < data[j].name) {
+					temp[k] = data[i];
+					k++;
+					i++;
+				}
+				else {
+					temp[k] = data[j];
+					k++;
+					j++;
+				}
+			}
+			else
+			{
+				temp[k] = data[j];
+				k++;
+				j++;
+			}
+		}
+	}
+	// Insert all the remaining values from i to mid into temp[].
+	while (i <= mid)
+	{
+		temp[k] = data[i];
+		k++;
+		i++;
+	}
+
+	// Insert all the remaining values from j to high into temp[].
+	while (j <= high)
+	{
+		temp[k] = data[j];
+		k++;
+		j++;
+	}
+
+
+	// Assign sorted data stored in temp[] to a[].
+	for (i = low; i <= high; i++)
+	{
+		data[i] = temp[i - low];
+	}
+}
+
+// A function to split array into two parts.
+void TannerMergeSort(csv_data *data, int low, int high, char flag)
+{
+	int mid;
+	if (low < high)
+	{
+		mid = (low + high) / 2;
+		// Split the data into two half.
+		TannerMergeSort(data, low, mid, flag);
+		TannerMergeSort(data, mid + 1, high, flag);
+
+		// Merge them to get sorted output.
+		TannerMerge(data, low, high, mid, flag);
+	}
 }
