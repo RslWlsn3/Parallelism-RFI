@@ -469,6 +469,55 @@ void intMergeSortStart(int numInts, int numThreads, string outputFile_unsorted, 
 
 }
 
+void csvMergeSortStart(csv_data *data, char flag, int numThreads = 1)
+{
+	//TannerMergeSort(csv_d, 0, CSV_SIZE, 'n')
+
+	clock_t startTime = clock();
+
+	thread * threads;
+	threads = new thread[numThreads];
+
+	int range = CSV_SIZE / numThreads;
+	int low = 0;
+	int high = range;
+
+	// Create the threads and start merge sorting
+	for (int i = 0; i < numThreads; i++) {
+		if (i + 1 == numThreads) {
+			high = (CSV_SIZE - 1);
+		}
+		threads[i] = thread(TannerMergeSort, std::ref(data), low, high, flag);
+		low = high + 1;
+		high = range + high;
+	}
+
+	for (int i = 0; i < numThreads; i++) {
+		threads[i].join();
+	}
+
+	// Run merge on all the sections that were sorted by the threads
+	high = range + range;
+	int mid = range;
+	for (int i = 0; i < (numThreads - 1); i++) {
+		if (i + 1 == (numThreads - 1)) {
+			high = (CSV_SIZE - 1);
+		}
+		TannerMerge(data, 0, high, mid, flag);
+		mid = high;
+		high = range + high;
+	}
+
+	delete[] threads;
+	threads = nullptr;
+
+	clock_t duration = clock() - startTime;
+
+	cout << "Program is finished executing." << endl;
+	double timeElapsed = (double)duration / CLOCKS_PER_SEC;
+	cout << "Time Elapsed = " << timeElapsed << " seconds." << endl;
+
+}
 
 int main(int argc, char*argv[])
 {	
@@ -483,7 +532,9 @@ int main(int argc, char*argv[])
 		char flag = argv[3][0];
 		string inputFile = argv[4];
 		outputFile = argv[5];
-		// Driver for mergesortCSV here
+		csv_data *csv_d;
+		csv_d = readCSV(inputFile);
+		csvMergeSortStart(csv_d, flag, stoi(argv[1]));
 	}
 	else {
 		cout << "The expected parameters are:\n";
@@ -493,17 +544,11 @@ int main(int argc, char*argv[])
 
 	//test_merge_int_serial();
 	//cout << get_date_value(10, 4, 1964);
-	csv_data *csv_d;
-	csv_d = readCSV("alumni.csv");
-	TannerMergeSort(csv_d, 0, CSV_SIZE, 'n');
-	saveCSV(csv_d, outputFile);
+
+
 	//clock_t startTime = clock();
 	//serialMergeSortString(csv_d, 0, CSV_SIZE - 1, CSV_SIZE);
 	//clock_t duration = clock() - startTime;
-	for (int i = 0; i < CSV_SIZE; i++)
-	{
-		cout << csv_d[i].name << endl;
-	}
 	//cout << duration;
 
 	//test_merge_string_serial();
