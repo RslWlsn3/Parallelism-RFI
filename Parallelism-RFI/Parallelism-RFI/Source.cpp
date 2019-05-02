@@ -43,7 +43,7 @@ public:
 
 
 
-void convertGradDate(csv_data*);
+void convertGradDate(vector<csv_data>);
 
 class randomInts
 {
@@ -76,11 +76,6 @@ vector<randomInts> create_random_nums(int size)
 	return randomNumVector;
 }
 
-void PrintArray(int *array, int n) {
-	for (int i = 0; i < n; ++i)
-		cout << array[i] << " " << flush<<endl;
-	cout << endl;
-}
 
 //TO DO: sort by grad's date if they have the same name, dateArray has #days from current day(not currently being used)
 //Function 2 of 2 for serial merge sort using strings
@@ -258,15 +253,15 @@ int get_date_value(int month, int day, int year)
 	date_value += (current_month - month) * days_in_month(year, month);
 	date_value += (current_day - day);
 	return date_value;
-
 }
-csv_data* readCSV(string fileName) {
+vector<csv_data> readCSV(string fileName) {
 	ifstream file;
 	string temp;
 	file.open(fileName);
 	int i = -1;
 
-	csv_data* alumni = new csv_data[CSV_SIZE];
+	//csv_data* alumni = new csv_data[CSV_SIZE];
+	vector<csv_data> alumni;
 
 	if (file.is_open()) {
 		//read from the file
@@ -313,7 +308,7 @@ csv_data* readCSV(string fileName) {
 				d.institution = temp;
 			}
 
-			alumni[i] = d;
+			alumni.push_back(d);
 		}
 	}
 	else {
@@ -324,7 +319,7 @@ csv_data* readCSV(string fileName) {
 
 }
 
-void convertGradDate(csv_data* data) {
+void convertGradDate(vector<csv_data> data) {
 	string value;
 
 	unordered_map<string, int> MONTHS;
@@ -409,6 +404,68 @@ void merge_sort(vector<T>& vec, int start, int end)
 	merge_sort(vec, (mid + 1), end);
 
 	merge(vec, start, mid, end);
+}
+int num = 0;
+void connor_merge(vector<csv_data> vec, int start, int mid, int end, char flag)
+{
+	vector<csv_data> one(vec.begin() + start, vec.begin() + mid + 1);
+	vector<csv_data> two(vec.begin() + mid + 1, vec.begin() + end + 1);
+
+	int a = 0;
+	int b = 0;
+	int d1 = NULL;
+	int d2 = NULL;
+	string s1;
+	string s2;	
+	
+	int index = start;
+	while (a < one.size() && b < two.size())
+	{
+		if (flag == 'd')
+		{
+			d1 = one[a].date_value;
+			d2 = two[a].date_value;
+		}
+		else
+		{
+			s1 = one[a].name;
+			s2 = two[a].name;
+		}
+		if (d1 == NULL)
+		{
+			if (s1 < s2)
+				vec[index++] = one[a++];
+			else
+				vec[index++] = two[b++];
+		}
+		else
+		{
+			if (d1 < d2)
+				vec[index++] = one[a++];
+			else
+				vec[index++] = two[b++];
+		}
+	}
+
+	// merge the left-over elements
+	while (a < one.size())
+		vec[index++] = one[a++];
+	while (b < two.size())
+		vec[index++] = two[b++];
+}
+
+template <typename T>
+void connor_merge_sort(vector<T>& vec, int start, int end)
+{
+	if (start >= end)
+		return;
+
+	int mid = start + (end - start) / 2;
+
+	connor_merge_sort(vec, start, mid);
+	connor_merge_sort(vec, (mid + 1), end);
+
+	connor_merge(vec, start, mid, end, 'd');
 }
 
 void driver()
@@ -495,10 +552,11 @@ int main(int argc, char*argv[])
 	//driver(2);
 	//test_merge_int_serial();
 	//cout << get_date_value(10, 4, 1964);
-	csv_data *csv_d;
+	vector<csv_data> csv_d;
 	csv_d = readCSV("alumni.csv");
 	clock_t startTime = clock();
-	serialMergeSortString(csv_d, 0, CSV_SIZE - 1, CSV_SIZE);
+	//serialMergeSortString(csv_d, 0, CSV_SIZE - 1, CSV_SIZE);
+	connor_merge_sort(csv_d, 0, 0);
 	clock_t duration = clock() - startTime;
 	for (int i = 0; i < CSV_SIZE; i++)
 	{
