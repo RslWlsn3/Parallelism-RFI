@@ -22,30 +22,18 @@ class csv_data
 {
 public:
 	string name;
-	string donorStatus;
+	string donorStatus = "";
 	string gradDate;
-	int year;
-	int month;
-	int day;
+	int year = 0;
+	int month = 0;
+	int day = 0;
 	int date_value;
-	string institution;
-
-
-	template<typename T>
-	T first(char flag) {
-		return (flag == 'n' ? name : date_value);
-	}
-	template<typename T>
-	T second(char flag) {
-		return (flag == 'n' ? date_value : name);
-	}
+	string institution = "";
 };
 
 void TannerMergeSort(csv_data *data, int low, int high, char flag);
 void TannerMerge(csv_data *data, int low, int high, int mid, char flag);
-
-
-
+void saveCSV(csv_data*data, string outputFile);
 void convertGradDate(csv_data*);
 
 class randomInts
@@ -476,11 +464,18 @@ void intMergeSortStart(int numInts, int numThreads = 1)
 
 int main(int argc, char*argv[])
 {
+	int numberOfThreads = stoi(argv[1]);
+	string outputFileUnsorted, outputFile;
 	if (*argv[2] == 'i') {
 		intMergeSortStart(stoi(argv[3]), stoi(argv[1]));
+		outputFileUnsorted = argv[4];
+		outputFile = argv[5];
 	}
 	else if (*argv[2] == 'a') {
-
+		char flag = argv[3][0];
+		string inputFile = argv[4];
+		outputFile = argv[5];
+		// Driver for mergesortCSV here
 	}
 	else {
 		cout << "The expected parameters are:\n";
@@ -493,6 +488,7 @@ int main(int argc, char*argv[])
 	csv_data *csv_d;
 	csv_d = readCSV("alumni.csv");
 	TannerMergeSort(csv_d, 0, CSV_SIZE, 'n');
+	saveCSV(csv_d, outputFile);
 	//clock_t startTime = clock();
 	//serialMergeSortString(csv_d, 0, CSV_SIZE - 1, CSV_SIZE);
 	//clock_t duration = clock() - startTime;
@@ -629,4 +625,32 @@ void TannerMergeSort(csv_data *data, int low, int high, char flag)
 		// Merge them to get sorted output.
 		TannerMerge(data, low, high, mid, flag);
 	}
+}
+
+void saveCSV(csv_data*data, string outputFile) {
+
+	ofstream ofile;
+	ofile.open(outputFile);
+
+	for (int i = 0; i < CSV_SIZE; i++) {
+		ofile << "\"";
+		ofile << data[i].name;
+		ofile << "\"";
+		ofile << ", ";
+		ofile << data[i].donorStatus;
+		ofile << ", ";
+		ofile << "\"";
+		ofile << data[i].month;
+		ofile << "-";
+		ofile << data[i].day;
+		ofile << "-";
+		ofile << data[i].year;
+		ofile << "\"";
+		ofile << ",";
+		ofile << data[i].institution;
+		ofile << endl;
+	}
+	ofile.close();
+	return;
+
 }
