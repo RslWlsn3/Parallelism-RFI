@@ -14,35 +14,26 @@ using namespace std;
 
 const int CSV_SIZE = 25038;
 
+
+
 //TO DO: use this instead of namesArray and dateArray
+
 class csv_data
 {
 public:
 	string name;
-	string donorStatus;
+	string donorStatus = "";
 	string gradDate;
-	int year;
-	int month;
-	int day;
+	int year = 0;
+	int month = 0;
+	int day = 0;
 	int date_value;
-	string institution;
-
-
-	template<typename T>
-	T first(char flag) {
-		return (flag == 'n' ? name : date_value);
-	}
-	template<typename T>
-	T second(char flag) {
-		return (flag == 'n' ? date_value : name);
-	}
+	string institution = "";
 };
 
 void TannerMergeSort(csv_data *data, int low, int high, char flag);
 void TannerMerge(csv_data *data, int low, int high, int mid, char flag);
-
-
-
+void saveCSV(csv_data*data, string outputFile);
 void convertGradDate(csv_data*);
 
 class randomInts
@@ -151,6 +142,7 @@ void serialMergeSortString(csv_data csv_data_array[], int low, int high, int siz
 	}
 }
 
+
 //function 1 of 2 for serial merge sort using ints
 void serialMergeint(int numArray[], int low, int  mid, int high) {
 	int *temp = new int[high - low + 1];//temporary merger array
@@ -187,6 +179,20 @@ void serialMergeSortint(int numArray[], int low, int high, int size)
 		serialMergeint(numArray, low, mid, high);
 	}
 }
+
+////creates 1 billion (currently only hundred million) random ints and then calls serialMergeSortint to sort them serialy or
+//void test_merge_int_serial()
+//{
+//	//code to test merge sort with ints
+//	int size = 100000000;	//crashes when I add another 0
+//	int* arr = create_random_nums(size);
+//
+//	serialMergeSortint(arr, 0, size - 1, size);
+//
+//	//print out results
+//	for (int i = 0; i < size; i++)
+//		cout << arr[i] << endl;
+//}
 
 void test_merge_string_serial()
 {
@@ -245,7 +251,6 @@ int get_date_value(int month, int day, int year)
 	return date_value;
 
 }
-
 csv_data* readCSV(string fileName) {
 	ifstream file;
 	string temp;
@@ -357,6 +362,8 @@ void convertGradDate(csv_data* data) {
 
 	}
 }
+int threadCount = 0;
+int threadSize;
 
 template <typename T>
 void merge(vector<T>& vec, int start, int mid, int end)
@@ -400,9 +407,11 @@ void intMergeSortStart(int numInts, int numThreads = 1)
 {
 
 	vector<int> vec;
+	ofstream outputFile("unsorted_random_nums.txt");
 	for (long long int i = 0; i < numInts; i++) {
 		int x = rand() % INT_MAX;
 		vec.push_back(x);
+		outputFile << x << endl;
 	}
 
 	clock_t startTime = clock();
@@ -444,6 +453,12 @@ void intMergeSortStart(int numInts, int numThreads = 1)
 	threads = nullptr;
 
 	clock_t duration = clock() - startTime;
+
+	ofstream outputFile2("sorted_random_nums.txt");
+	for (long long int i = 0; i < numInts; i++) {
+
+		outputFile2 << vec[i] << endl;
+	}
 
 	//for (int i = 0; i < vec.size(); i++)
 	//	cout << vec[i] << endl;
@@ -506,14 +521,21 @@ void csvMergeSortStart(csv_data *data, char flag, int numThreads = 1)
 
 int main(int argc, char*argv[])
 {
+	intMergeSortStart(1000, 1);
+	int numberOfThreads = stoi(argv[1]);
+	string outputFileUnsorted, outputFile;
 	if (*argv[2] == 'i') {
 		intMergeSortStart(stoi(argv[3]), stoi(argv[1]));
+		outputFileUnsorted = argv[4];
+		outputFile = argv[5];
 	}
 	else if (*argv[2] == 'a') {
+		char flag = argv[3][0];
+		string inputFile = argv[4];
+		outputFile = argv[5];
 		csv_data *csv_d;
-		csv_d = readCSV("alumni.csv");
-
-		csvMergeSortStart(csv_d, 'n', stoi(argv[1]));
+		csv_d = readCSV(inputFile);
+		csvMergeSortStart(csv_d, flag, stoi(argv[1]));
 	}
 	else {
 		cout << "The expected parameters are:\n";
@@ -657,4 +679,32 @@ void TannerMergeSort(csv_data *data, int low, int high, char flag)
 		// Merge them to get sorted output.
 		TannerMerge(data, low, high, mid, flag);
 	}
+}
+
+void saveCSV(csv_data*data, string outputFile) {
+
+	ofstream ofile;
+	ofile.open(outputFile);
+
+	for (int i = 0; i < CSV_SIZE; i++) {
+		ofile << "\"";
+		ofile << data[i].name;
+		ofile << "\"";
+		ofile << ", ";
+		ofile << data[i].donorStatus;
+		ofile << ", ";
+		ofile << "\"";
+		ofile << data[i].month;
+		ofile << "-";
+		ofile << data[i].day;
+		ofile << "-";
+		ofile << data[i].year;
+		ofile << "\"";
+		ofile << ",";
+		ofile << data[i].institution;
+		ofile << endl;
+	}
+	ofile.close();
+	return;
+
 }
