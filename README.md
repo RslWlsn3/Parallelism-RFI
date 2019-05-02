@@ -1,73 +1,13 @@
 # Parallelism-RFI
-Note - we may need to create a new repo since I'm using VS2015. 
+Tanner T. Connor M. Blake J.
+* Included is a merge sort that can be ran on a number of integers or a csv file of NNU alumni
+* For integers, call like:
+>Parallelism-RFI.exe NumberOfThreads i NumberOfInts unsortedOutputFile.txt sortedOutputFile.txt
 
-call test_merge_string_serial() to test merge sort using name and a date value (# of days between date given and current date). To get a date value call get_date_value(month, day, year). 
+* For the csv, call like:
+>Parallelism-RFI.exe NumberOfThreads a (n or d) inputFile.csv sortedOutputFile.csv
 
-call create_random_nums(size) with size being # of random numbers to be generated. I can only get to a 100 million before it breaks. 
+* Where n sorts based on names, d sorts based on dates
 
-calling test_merge_int_serial() creates 100 mil random ints and then sorts them 
-
-
-code form Nathan to parse file:
-
- std::vector <csv_data> csvParser(const std::string fileName) {
-    //local vars
-    std::string temp;
-
-    //create arr
-    std::vector <csv_data> data;
-
-    std::fstream file;
-    file.open(fileName);
-
-    if (file.is_open()) {
-        //read from the file
-
-        //ignore the first line
-        file.ignore(200, '\n');
-
-        while (!file.eof()) {
-			//create new csv_data obj
-			csv_data d;
-
-			//trash
-			getline(file, temp, '"');
-
-			//get value
-			getline(file, temp, '"');
-			d.setName(temp);
-
-			//trash comma
-			getline(file, temp, ',');
-
-			//get value
-			getline(file, temp, ',');
-			d.setDonorStatus(temp);
-
-			//trash
-			getline(file, temp, ',');
-			if (temp.empty()) {
-				getline(file, temp, '\n');
-			} else {
-				//parse date
-				temp.erase(0, 1);
-				d.setGradDate(temp);
-
-				getline(file, temp, '"');
-				d.setGradDate(d.getGradDate().toString() + "," + temp);
-
-				//trash
-				getline(file, temp, ',');
-				//get inst
-				getline(file, temp, '\n');
-				d.setInstitution(temp);
-			}
-
-			data.push_back(d);
-        }
-	} else {
-        std::cout << "\nThere was an error opening " << fileName;
-    }
-
-	return data;
-}
+#### Notes
+* When running, writing to the output files will take significantly longer than sorting the file. The time recorded for the Merge Sort does not include this extra time.

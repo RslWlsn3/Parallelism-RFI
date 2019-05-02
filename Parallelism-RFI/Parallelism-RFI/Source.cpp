@@ -281,7 +281,7 @@ void intMergeSortStart(int numInts, int numThreads, string outputFile_unsorted, 
 	//for (int i = 0; i < vec.size(); i++)
 	//	cout << vec[i] << endl;
 
-	cout << "Program is finished executing." << endl;
+	cout << "MergeSort finished executing." << endl;
 	double timeElapsed = (double)duration / CLOCKS_PER_SEC;
 	cout << "Time Elapsed = " << timeElapsed << " seconds." << endl;
 
@@ -331,7 +331,7 @@ void csvMergeSortStart(csv_data *data, char flag, int numThreads = 1)
 
 	clock_t duration = clock() - startTime;
 
-	cout << "Program is finished executing." << endl;
+	cout << "MergeSort finished executing." << endl;
 	double timeElapsed = (double)duration / CLOCKS_PER_SEC;
 	cout << "Time Elapsed = " << timeElapsed << " seconds." << endl;
 
