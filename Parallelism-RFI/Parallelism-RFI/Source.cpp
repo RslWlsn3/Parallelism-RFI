@@ -29,18 +29,10 @@ public:
 	int day;
 	int date_value;
 	string institution;
-
-
-	template<typename T>
-	T first(char flag) {
-		return (flag == 'n' ? name : date_value);
-	}
-	template<typename T>
-	T second(char flag) {
-		return (flag == 'n' ? date_value : name);
-	}
 };
 
+void TannerMerge(csv_data*, int, int, int , char);
+void TannerMergeSort(csv_data*, int, int, char);
 
 
 void convertGradDate(csv_data*);
@@ -415,14 +407,14 @@ void driver()
 {
 
 	vector<int> vec;
-	for (long long int i = 0; i < 100000000; i++) {
+	for (long long int i = 0; i < 1000000; i++) {
 		int x = rand() % INT_MAX;
 		vec.push_back(x);
 	}
 
 	clock_t startTime = clock();
 
-	int numThreads = 4;
+	int numThreads = 2;
 	long long int range = vec.size() / numThreads;
 	thread * threads;
 	threads = new thread[numThreads];
@@ -490,6 +482,8 @@ void driver()
 }
 
 
+
+
 int main(int argc, char*argv[])
 {
 	//driver(2);
@@ -497,14 +491,20 @@ int main(int argc, char*argv[])
 	//cout << get_date_value(10, 4, 1964);
 	csv_data *csv_d;
 	csv_d = readCSV("alumni.csv");
-	clock_t startTime = clock();
-	serialMergeSortString(csv_d, 0, CSV_SIZE - 1, CSV_SIZE);
-	clock_t duration = clock() - startTime;
+	TannerMergeSort(csv_d, 0, CSV_SIZE, 'd');
+
+	
+	//clock_t startTime = clock();
+	//serialMergeSortString(csv_d, 0, CSV_SIZE - 1, CSV_SIZE);
+	//driver();
+	//clock_t duration = clock() - startTime;
+	
 	for (int i = 0; i < CSV_SIZE; i++)
 	{
-		cout << csv_d[i].name << endl;
+		cout << csv_d[i].name << " " << csv_d[i].date_value << " " << i << endl;
 	}
-	cout << duration;
+	//cout << "COCK" << endl;
+	//cout << duration;
 
 	//test_merge_string_serial();
 	/*int numberOfThreads = stoi(argv[1]), numsToSort;
@@ -528,4 +528,108 @@ int main(int argc, char*argv[])
 			cout << randomNumVector[i].randomNum;
 		}
 	}*/
+}
+
+void TannerMerge(csv_data *data, int low, int high, int mid, char flag)
+{
+	
+	// We have low to mid and mid+1 to high already sorted.
+	int i, j, k;
+	csv_data *temp = new csv_data [high - low + 1];
+	i = low;
+	k = 0;
+	j = mid + 1;
+	// Merge the two parts into temp[].
+	while (i <= mid && j <= high)
+	{
+		if (flag == 'n') {
+			if (data[i].name < data[j].name)
+			{
+				temp[k] = data[i];
+				k++;
+				i++;
+			}
+			else if (data[i].name == data[j].name) {
+				if (data[i].date_value < data[j].date_value) {
+					temp[k] = data[i];
+					k++;
+					i++;
+				}
+				else {
+					temp[k] = data[j];
+					k++;
+					j++;
+				}
+			}
+			else
+			{
+				temp[k] = data[j];
+				k++;
+				j++;
+			}
+		} else if (flag == 'd') {
+			if (data[i].date_value < data[j].date_value)
+			{
+				temp[k] = data[i];
+				k++;
+				i++;
+			}
+			else if (data[i].date_value == data[j].date_value) {
+				if (data[i].name < data[j].name) {
+					temp[k] = data[i];
+					k++;
+					i++;
+				}
+				else {
+					temp[k] = data[j];
+					k++;
+					j++;
+				}
+			}
+			else
+			{
+				temp[k] = data[j];
+				k++;
+				j++;
+			}
+		}
+	}
+	// Insert all the remaining values from i to mid into temp[].
+	while (i <= mid)
+	{
+		temp[k] = data[i];
+		k++;
+		i++;
+	}
+
+	// Insert all the remaining values from j to high into temp[].
+	while (j <= high)
+	{
+		temp[k] = data[j];
+		k++;
+		j++;
+	}
+
+
+	// Assign sorted data stored in temp[] to a[].
+	for (i = low; i <= high; i++)
+	{
+		data[i] = temp[i - low];
+	}
+}
+
+// A function to split array into two parts.
+void TannerMergeSort(csv_data *data, int low, int high, char flag)
+{
+	int mid;
+	if (low < high)
+	{
+		mid = (low + high) / 2;
+		// Split the data into two half.
+		TannerMergeSort(data, low, mid, flag);
+		TannerMergeSort(data, mid + 1, high, flag);
+
+		// Merge them to get sorted output.
+		TannerMerge(data, low, high, mid, flag);
+	}
 }
