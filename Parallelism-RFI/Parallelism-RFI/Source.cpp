@@ -14,10 +14,7 @@ using namespace std;
 
 const int CSV_SIZE = 25038;
 
-
-
 //TO DO: use this instead of namesArray and dateArray
-
 class csv_data
 {
 public:
@@ -40,8 +37,6 @@ public:
 		return (flag == 'n' ? date_value : name);
 	}
 };
-
-
 
 void convertGradDate(csv_data*);
 
@@ -151,7 +146,6 @@ void serialMergeSortString(csv_data csv_data_array[], int low, int high, int siz
 	}
 }
 
-
 //function 1 of 2 for serial merge sort using ints
 void serialMergeint(int numArray[], int low, int  mid, int high) {
 	int *temp = new int[high - low + 1];//temporary merger array
@@ -188,20 +182,6 @@ void serialMergeSortint(int numArray[], int low, int high, int size)
 		serialMergeint(numArray, low, mid, high);
 	}
 }
-
-////creates 1 billion (currently only hundred million) random ints and then calls serialMergeSortint to sort them serialy or
-//void test_merge_int_serial()
-//{
-//	//code to test merge sort with ints
-//	int size = 100000000;	//crashes when I add another 0
-//	int* arr = create_random_nums(size);
-//
-//	serialMergeSortint(arr, 0, size - 1, size);
-//
-//	//print out results
-//	for (int i = 0; i < size; i++)
-//		cout << arr[i] << endl;
-//}
 
 void test_merge_string_serial()
 {
@@ -260,6 +240,7 @@ int get_date_value(int month, int day, int year)
 	return date_value;
 
 }
+
 csv_data* readCSV(string fileName) {
 	ifstream file;
 	string temp;
@@ -370,8 +351,6 @@ void convertGradDate(csv_data* data) {
 
 	}
 }
-int threadCount = 0;
-int threadSize;
 
 template <typename T>
 void merge(vector<T>& vec, int start, int mid, int end)
