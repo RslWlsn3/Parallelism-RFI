@@ -411,7 +411,7 @@ void merge_sort(vector<T>& vec, int start, int end)
 	merge(vec, start, mid, end);
 }
 
-void driver()
+void intMergeSortStart(int numThreads = 1)
 {
 
 	vector<int> vec;
@@ -422,12 +422,14 @@ void driver()
 
 	clock_t startTime = clock();
 
-	int numThreads = 4;
-	long long int range = vec.size() / numThreads;
 	thread * threads;
 	threads = new thread[numThreads];
+
+	long long int range = vec.size() / numThreads;
 	long long int low = 0;
 	long long int high = range;
+
+	// Create the threads and start merge sorting
 	for (int i = 0; i < numThreads; i++) {
 		if (i + 1 == numThreads) {
 			high = (vec.size() - 1);
@@ -441,6 +443,7 @@ void driver()
 		threads[i].join();
 	}
 
+	// Run merge on all the sections that were sorted by the threads
 	high = range + range;
 	long long int mid = range;
 	for (int i = 0; i < (numThreads - 1); i++) {
@@ -454,29 +457,6 @@ void driver()
 
 	delete[] threads;
 	threads = nullptr;
-
-	//merge(vec, 0, range, (vec.size() - 1));
-	/*
-	thread first(merge_sort<int>, std::ref(vec), 0, 12500000);
-	thread second(merge_sort<int>, std::ref(vec), 12500001, 25000000);
-	thread third(merge_sort<int>, std::ref(vec), 25000001, 37500000);
-	thread forth(merge_sort<int>, std::ref(vec), 37500001, 50000000);
-	thread fifth(merge_sort<int>, std::ref(vec), 50000001, 62500000);
-	thread six(merge_sort<int>, std::ref(vec), 62500001, 75000000);
-	thread seven(merge_sort<int>, std::ref(vec), 75000001, 87500000);
-	thread eight(merge_sort<int>, std::ref(vec), 87500001, 99999999);
-
-	first.join();
-	second.join();
-	third.join();
-	forth.join();
-	fifth.join();
-	six.join();
-	seven.join();
-	eight.join();
-
-	merge(vec, 0, 50000000, 99999999);
-	*/
 
 	clock_t duration = clock() - startTime;
 
@@ -492,7 +472,7 @@ void driver()
 
 int main(int argc, char*argv[])
 {
-	//driver(2);
+	intMergeSortStart(stoi(argv[1]));
 	//test_merge_int_serial();
 	//cout << get_date_value(10, 4, 1964);
 	csv_data *csv_d;
