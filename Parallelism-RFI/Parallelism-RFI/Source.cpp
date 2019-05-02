@@ -151,6 +151,37 @@ void serialMergeSortString(csv_data csv_data_array[], int low, int high, int siz
 	}
 }
 
+//int threadSize = 2;
+//int threadCount = 0;
+//
+//void serialMergeSortString(csv_data csv_data_array[], int low, int high, int size)
+//{
+//	int mid = 0;
+//
+//	if (low < high)
+//	{
+//		mid = ((low + high) / 2);
+//		if (threadCount < threadSize)
+//		{
+//			threadCount++;
+//			thread first(csv_data_array, low, mid, size);
+//		}			
+//		else
+//			serialMergeSortString(csv_data_array, low, mid, size);
+//		if (threadCount < threadSize)
+//		{
+//			threadCount++;
+//			thread second(csv_data_array, mid + 1, high, size);
+//		}
+//		else
+//			serialMergeSortString(csv_data_array, mid + 1, high, size);
+//		first.join();
+//		second.join();
+//			
+//		serialMergeString(csv_data_array, low, mid, high, size);
+//	}
+//}
+
 
 //function 1 of 2 for serial merge sort using ints
 void serialMergeint(int numArray[], int low, int  mid, int high) {
@@ -273,9 +304,11 @@ csv_data* readCSV(string fileName) {
 
 		//ignore the first line
 		file.ignore(200, '\n');
+		int counter = 0;
 
 		while (!file.eof()) {
 			i++;
+			counter++;
 			//create new csv_data obj
 			csv_data d;
 
@@ -311,8 +344,7 @@ csv_data* readCSV(string fileName) {
 				//get inst
 				getline(file, temp, '\n');
 				d.institution = temp;
-			}
-
+			}			
 			alumni[i] = d;
 		}
 	}
@@ -370,8 +402,7 @@ void convertGradDate(csv_data* data) {
 
 	}
 }
-int threadCount = 0;
-int threadSize = 3;
+
 
 //template <typename T>
 //void merge(vector<T>& vec, int start, int mid, int end)
@@ -484,13 +515,25 @@ int main(int argc, char*argv[])
 	csv_data *csv_d;
 	csv_d = readCSV("alumni.csv");
 	clock_t startTime = clock();
-	serialMergeSortString(csv_d, 0, CSV_SIZE - 1, CSV_SIZE);
+	serialMergeSortString(csv_d, 0, CSV_SIZE-1, CSV_SIZE);
+	/*thread first(serialMergeSortString, csv_d, 0, 999, 1000);
+	thread sec(serialMergeSortString, csv_d, 1000, 1999, 2000);
+	thread third(serialMergeSortString, csv_d, 2000, 2999, 3000);
+	thread forth(serialMergeSortString, csv_d, 3000, 3999, 4000);
+	thread fith(serialMergeSortString, csv_d, 4000, 4999, 5000);
+	first.join();
+	sec.join();
+	third.join();
+	forth.join();
+	fith.join();
+	serialMergeString(csv_d, 0, 2499, 4999, 5000);*/
 	clock_t duration = clock() - startTime;
-	for (int i = 0; i < CSV_SIZE; i++)
+	double timeElapsed = (double)duration / CLOCKS_PER_SEC;
+	/*for (int i = 0; i < 5000; i++)
 	{
-		cout << csv_d[i].name << endl;
-	}
-	cout << duration;
+		cout << csv_d[i].name << csv_d[i].gradDate<<endl;
+	}*/
+	cout << timeElapsed;
 
 	//test_merge_string_serial();
 	/*int numberOfThreads = stoi(argv[1]), numsToSort;
